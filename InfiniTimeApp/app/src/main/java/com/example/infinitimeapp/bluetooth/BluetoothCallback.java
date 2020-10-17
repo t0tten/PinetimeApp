@@ -4,42 +4,19 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
-import com.example.infinitimeapp.common.Constants;
+import com.example.infinitimeapp.MainActivity;
 import com.example.infinitimeapp.services.CurrentTimeService;
 import com.example.infinitimeapp.services.DeviceInformationService;
 import com.example.infinitimeapp.services.PinetimeService;
 
-import java.util.Calendar;
 import java.util.UUID;
 
 import static com.example.infinitimeapp.common.Constants.*;
 
 public class BluetoothCallback extends BluetoothGattCallback {
-
-    private byte ConvertDecimal2BCD(byte decimal) {
-        byte result = 0;
-        result += (decimal % 10);
-        result += (decimal / 10 << 0x4);
-        return result;
-    }
-
-    private byte[] getCurrentTime () {
-        byte[] values = new byte[20];
-        Calendar dateTime = Calendar.getInstance();
-        //values[0] = COMMAND_ID_SETTING_TIME;
-        values[1] = ConvertDecimal2BCD((byte) dateTime.get(Calendar.YEAR));
-        values[1] = ConvertDecimal2BCD((byte) dateTime.get(Calendar.MONTH));
-        values[2] = ConvertDecimal2BCD((byte) dateTime.get(Calendar.DAY_OF_MONTH));
-        values[3] = ConvertDecimal2BCD((byte) dateTime.get(Calendar.HOUR_OF_DAY));
-        values[4] = ConvertDecimal2BCD((byte) dateTime.get(Calendar.MINUTE));
-        values[5] = ConvertDecimal2BCD((byte) dateTime.get(Calendar.SECOND));
-        return values;
-    }
-
     @Override
     public void onPhyUpdate(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
         Log.i(TAG, "onPhyRead");
@@ -55,8 +32,9 @@ public class BluetoothCallback extends BluetoothGattCallback {
     @Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
         if (newState == BluetoothProfile.STATE_CONNECTED) {
+            MainActivity.gatt = gatt;
             if(!gatt.discoverServices()) {
-                Log.i(TAG, "Could not connect to Watch ...");
+                Log.e(TAG, "Could not connect to Watch ...");
             }
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             Log.i(TAG, "Disconnected from GATT server.");
@@ -68,14 +46,8 @@ public class BluetoothCallback extends BluetoothGattCallback {
         if (status == BluetoothGatt.GATT_SUCCESS) {
             Log.i(TAG, "onServicesDiscovered received: GATT_SUCCESS\n");
 
-            PinetimeService pinetimeService = new DeviceInformationService();
-            BluetoothGattService devInfoService = gatt.getService(Constants.DEVICE_INFO_SERVICE);
-            BluetoothGattCharacteristic bgc = devInfoService.getCharacteristic(pinetimeService.getCharacteristicUUID(DeviceInformationService.FW_REVISION_ID));
-
-            Log.i(TAG, "Asking watch about Device Information:");
-            if(!gatt.readCharacteristic(bgc)) {
-                Log.i(TAG, "Could not send read request ...");
-            }
+            DeviceInformationService dis = new DeviceInformationService();
+            dis.getFwRevisionId();
         } else {
             Log.i(TAG, "onServicesDiscovered received: " + status);
         }
@@ -93,9 +65,12 @@ public class BluetoothCallback extends BluetoothGattCallback {
         }
 
         String characteristicName = pinetimeService.getCharacteristicName(characteristic.getUuid());
+        String message = new String(characteristic.getValue());
+        pinetimeService.onDataRecieved(characteristicName, message);
+
         Log.i(TAG, "Answer for " + characteristicName + " request, STATUS: " + status);
         Log.i(TAG, "\tBYTE VALUE: " + characteristic.getValue().toString());
-        Log.i(TAG, "\tSTRING-VALUE: " + new String(characteristic.getValue()));
+        Log.i(TAG, "\tSTRING-VALUE: " + message);
         super.onCharacteristicRead(gatt, characteristic, status);
     }
 
