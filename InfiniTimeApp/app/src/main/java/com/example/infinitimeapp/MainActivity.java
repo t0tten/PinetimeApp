@@ -29,9 +29,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         mBluetoothService.init(this);
-        setContentView(R.layout.activity_main);
 
         final Button button = findViewById(R.id.scanButton);
         button.setOnClickListener(v -> {
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    
+
     @Override
     public void onDestroy() {
         mBluetoothService.teardown();

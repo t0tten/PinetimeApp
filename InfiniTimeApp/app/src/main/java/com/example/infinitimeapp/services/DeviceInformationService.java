@@ -1,10 +1,7 @@
 package com.example.infinitimeapp.services;
 
 import android.util.Log;
-import com.example.infinitimeapp.bluetooth.BluetoothService;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

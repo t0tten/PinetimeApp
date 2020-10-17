@@ -1,23 +1,11 @@
 package com.example.infinitimeapp.services;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
-import android.util.Log;
-
-import com.example.infinitimeapp.MainActivity;
 import com.example.infinitimeapp.bluetooth.BluetoothService;
-import com.example.infinitimeapp.common.Constants;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.example.infinitimeapp.common.Constants.TAG;
 
 public class CurrentTimeService extends BaseService {
     private static final String CURRENT_TIME = "CURRENT_TIME";

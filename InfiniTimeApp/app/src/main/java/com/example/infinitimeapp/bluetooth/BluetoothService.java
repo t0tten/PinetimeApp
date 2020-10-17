@@ -1,14 +1,11 @@
 package com.example.infinitimeapp.bluetooth;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.example.infinitimeapp.MainActivity;
-import com.example.infinitimeapp.common.Utils;
-import com.example.infinitimeapp.services.CurrentTimeService;
-import com.example.infinitimeapp.services.DeviceInformationService;
+import com.example.infinitimeapp.WatchActivity;
 import com.example.infinitimeapp.services.PinetimeService;
 import com.polidea.rxandroidble2.RxBleClient;
 import com.polidea.rxandroidble2.RxBleConnection;
@@ -17,7 +14,6 @@ import com.polidea.rxandroidble2.scan.ScanSettings;
 
 import java.util.UUID;
 
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 import static com.example.infinitimeapp.common.Constants.TAG;
@@ -94,6 +90,15 @@ public class BluetoothService {
                 .subscribe(
                         connectionState -> {
                             Log.i(TAG, connectionState.toString());
+
+                            if(connectionState == RxBleConnection.RxBleConnectionState.CONNECTED) {
+                                try {
+                                    Intent intent = new Intent(mContext.getApplicationContext(), WatchActivity.class);
+                                    mContext.startActivity(intent);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         },
                         throwable -> {
                             Log.e(TAG, "Error reading connection state: " + throwable);
@@ -105,7 +110,6 @@ public class BluetoothService {
                         rxBleConnection -> {
                             Log.i(TAG, "Connected to " + macAddresss);
                             mConnection = rxBleConnection;
-                            Utils.init();
                         },
                         throwable -> {
                             Log.e(TAG, "Error connecting: " + throwable);
