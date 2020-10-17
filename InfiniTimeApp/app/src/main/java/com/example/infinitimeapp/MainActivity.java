@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(TAG, "Found: " + result.getDevice().getAlias() + ", Address: " + result.getDevice().getAddress());
                     //if("E1:47:EF:BB:83:AB".equals(result.getDevice().getAddress())){
                     //if("InfiniTime".equals(result.getDevice().getAlias()))
-                    if("E1:88:AF:DF:17:DF".equals(result.getDevice().get.getAddress())){
+                    if("E1:88:AF:DF:17:DF".equals(result.getDevice().getAddress())){
                         //Log.i(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!FOUND: " + result.getDevice().getAddress());
                         pineTime = result.getDevice();
                         bluetoothLeScanner.stopScan(leScanCallback);
