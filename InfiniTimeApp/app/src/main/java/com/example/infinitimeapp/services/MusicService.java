@@ -22,7 +22,9 @@ public class MusicService extends BaseService {
     private static final char STATUS_MUSIC_PAUSED = 0x00;
     private static final char STATUS_MUSIC_PLAYING = 0x01;
 
-    public MusicService() {
+    private static MusicService sInstance = null;
+
+    private MusicService() {
         CHAR_MAP = Stream.of(new String[][]{
                 {EVENT, "c7e50002-00fc-48fe-8e23-433b3a1942d0"},
                 {STATUS, "c7e50003-00fc-48fe-8e23-433b3a1942d0"},
@@ -30,6 +32,13 @@ public class MusicService extends BaseService {
                 {ARTIST, "c7e50004-00fc-48fe-8e23-433b3a1942d0"},
                 {ALBUM, "c7e50006-00fc-48fe-8e23-433b3a1942d0"}
         }).collect(Collectors.toMap(p -> p[0], p -> p[1]));
+    }
+
+    public static MusicService getInstance() {
+        if (sInstance == null)
+            sInstance = new MusicService();
+
+        return sInstance;
     }
 
     @Override

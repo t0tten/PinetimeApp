@@ -12,7 +12,6 @@ public class Utils {
         s.getManufaturer();
         s.getSerial();
 
-        CurrentTimeService ct = new CurrentTimeService();
-        ct.updateTime();
+        CurrentTimeService.getInstance().updateTime();
     }
 }

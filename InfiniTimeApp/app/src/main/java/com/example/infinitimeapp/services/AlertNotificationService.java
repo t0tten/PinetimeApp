@@ -8,8 +8,17 @@ import java.util.UUID;
 public class AlertNotificationService extends BaseService {
     public static final String NEW_ALERT = "NEW_ALERT";
 
-    public AlertNotificationService() {
+    private static AlertNotificationService sInstance = null;
+
+    private AlertNotificationService() {
         CHAR_MAP.put(NEW_ALERT, "00002a46-0000-1000-8000-00805f9b34fb");
+    }
+
+    public static AlertNotificationService getInstance() {
+        if (sInstance == null)
+            sInstance = new AlertNotificationService();
+
+        return sInstance;
     }
 
     @Override

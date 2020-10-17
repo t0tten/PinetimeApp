@@ -10,8 +10,17 @@ import java.util.UUID;
 public class CurrentTimeService extends BaseService {
     private static final String CURRENT_TIME = "CURRENT_TIME";
 
-    public CurrentTimeService() {
+    private static CurrentTimeService sInstance = null;
+
+    private CurrentTimeService() {
         CHAR_MAP.put(CURRENT_TIME, "00002a2b-0000-1000-8000-00805f9b34fb");
+    }
+
+    public static CurrentTimeService getInstance() {
+        if (sInstance == null)
+            sInstance = new CurrentTimeService();
+
+        return sInstance;
     }
 
     @Override
