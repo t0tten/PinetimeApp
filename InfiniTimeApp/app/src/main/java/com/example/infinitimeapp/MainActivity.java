@@ -32,11 +32,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final Button button = findViewById(R.id.scanButton);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Looking for Pinetime watches nearby", Toast.LENGTH_LONG).show();
-                pinetimeScanner.beginScan();
-            }
+        button.setOnClickListener(v -> {
+            Toast.makeText(MainActivity.this, "Looking for Pinetime watches nearby", Toast.LENGTH_LONG).show();
+            pinetimeScanner.beginScan();
         });
 
         recyclerView = (RecyclerView) findViewById(R.id.devicesList);
@@ -51,16 +49,13 @@ public class MainActivity extends AppCompatActivity {
                     (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
 
-            // Ensures Bluetooth is available on the device and it is enabled. If not,
-            // displays a dialog requesting user permission to enable Bluetooth.
             if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
         }
     }
-
-
+    
     @Override
     public void onBackPressed() {
         if (gatt == null) {
