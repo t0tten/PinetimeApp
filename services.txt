@@ -1,0 +1,55 @@
+Generic Attribute
+Service: 00001800-0000-1000-8000-00805f9b34fb		- 
+ 	UUID: 00002a00-0000-1000-8000-00805f9b34fb	- Device Name
+	UUID: 00002a01-0000-1000-8000-00805f9b34fb	- Appearance
+
+Generic Attribute
+Service: 00001801-0000-1000-8000-00805f9b34fb
+ 	UUID: 00002a05-0000-1000-8000-00805f9b34fb	- Client Characteristic Configuration?
+
+DeviceInformationService
+Service: 0000180a-0000-1000-8000-00805f9b34fb		- DeviceInfoId
+ 	UUID: 00002a29-0000-1000-8000-00805f9b34fb	- manufactorerNameId
+ 	UUID: 00002a24-0000-1000-8000-00805f9b34fb	- m/n
+ 	UUID: 00002a25-0000-1000-8000-00805f9b34fb	- s/n
+ 	UUID: 00002a26-0000-1000-8000-00805f9b34fb	- fwRevisionId
+ 	UUID: 00002a27-0000-1000-8000-00805f9b34fb	- hwRevisionId
+ 	UUID: 00002a28-0000-1000-8000-00805f9b34fb	- swRevisionId
+
+Current Time Service
+Service: 00001805-0000-1000-8000-00805f9b34fb
+ 	UUID: 00002a2b-0000-1000-8000-00805f9b34fb 	- CurrentTime
+
+MusicService
+Service: c7e50001-00fc-48fe-8e23-433b3a1942d0		- msId
+ 	UUID: c7e50002-00fc-48fe-8e23-433b3a1942d0	- msEventCharId
+ 	UUID: c7e50003-00fc-48fe-8e23-433b3a1942d0	- msStatusCharId
+ 	UUID: c7e50005-00fc-48fe-8e23-433b3a1942d0	- msTrackCharId
+ 	UUID: c7e50004-00fc-48fe-8e23-433b3a1942d0	- msArtistCharId
+ 	UUID: c7e50006-00fc-48fe-8e23-433b3a1942d0	- msAlbumCharId
+
+	static const char EVENT_MUSIC_OPEN = 0xe0;
+        static const char EVENT_MUSIC_PLAY = 0x00;
+        static const char EVENT_MUSIC_PAUSE = 0x01;
+        static const char EVENT_MUSIC_NEXT = 0x03;
+        static const char EVENT_MUSIC_PREV = 0x04;
+        static const char EVENT_MUSIC_VOLUP = 0x05;
+        static const char EVENT_MUSIC_VOLDOWN = 0x06;
+        static const char STATUS_MUSIC_PAUSED = 0x00;
+        static const char STATUS_MUSIC_PLAYING = 0x01;
+
+Service: 00001811-0000-1000-8000-00805f9b34fb		- Alert
+ 	UUID: 00002a46-0000-1000-8000-00805f9b34fb	- New AlertId
+
+Device Firmware Update Service
+Service: 00001530-1212-efde-1523-785feabcd123
+ 	UUID: 00001532-1212-efde-1523-785feabcd123	- DFU Packet 
+ 	UUID: 00001531-1212-efde-1523-785feabcd123	- DFU Control Point
+ 	UUID: 00001534-1212-efde-1523-785feabcd123	- DFU Version
+
+
+
+
+
+
+
