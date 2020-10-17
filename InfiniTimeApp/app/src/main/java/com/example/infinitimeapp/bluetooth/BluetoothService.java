@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.example.infinitimeapp.MainActivity;
+import com.example.infinitimeapp.common.Utils;
 import com.example.infinitimeapp.services.CurrentTimeService;
 import com.example.infinitimeapp.services.DeviceInformationService;
 import com.example.infinitimeapp.services.PinetimeService;
@@ -25,7 +26,7 @@ public class BluetoothService {
 
     private static BluetoothService instance = null;
 
-        RxBleClient mRxBleClient;
+    RxBleClient mRxBleClient;
     Context mContext;
     Disposable mScanSubscription = null;
     Disposable mConnectionDisposable = null;
@@ -95,7 +96,7 @@ public class BluetoothService {
                             Log.i(TAG, connectionState.toString());
                         },
                         throwable -> {
-                            // Handle an error here.
+                            Log.e(TAG, "Error reading connection state: " + throwable);
                         }
                 );
 
@@ -104,13 +105,7 @@ public class BluetoothService {
                         rxBleConnection -> {
                             Log.i(TAG, "Connected to " + macAddresss);
                             mConnection = rxBleConnection;
-
-                            //read(UUID.fromString("00002a26-0000-1000-8000-00805f9b34fb"));
-                            DeviceInformationService s = new DeviceInformationService();
-                            s.getHwRevisionId();
-                            s.getFwRevisionId();
-                            s.getManufaturer();
-                            s.getSerial();
+                            Utils.init();
                         },
                         throwable -> {
                             Log.e(TAG, "Error connecting: " + throwable);
@@ -132,7 +127,11 @@ public class BluetoothService {
     }
 
     public void read(UUID characteristicUUID, PinetimeService service) {
-        mConnection.readCharacteristic(characteristicUUID).subscribe(
+        if(mConnection == null) {
+            return;
+        }
+
+        Disposable disposable = mConnection.readCharacteristic(characteristicUUID).subscribe(
                 characteristicValue -> {
                     service.onDataRecieved(characteristicUUID, characteristicValue);
                 },
@@ -140,4 +139,22 @@ public class BluetoothService {
                     Log.e(TAG, throwable.toString());
                 });
     }
+
+    public void write(UUID characteristicUUID, byte[] buffer) {
+        if(mConnection == null) {
+            return;
+        }
+
+        Disposable disposable = mConnection.writeCharacteristic(characteristicUUID, buffer).subscribe(
+                characteristicValue -> {
+                    Log.i(TAG, "Successfully wrote bytes to device.");
+                },
+                throwable -> {
+                    Log.e(TAG, throwable.toString());
+                }
+        );
+
+    }
+
+
 }
