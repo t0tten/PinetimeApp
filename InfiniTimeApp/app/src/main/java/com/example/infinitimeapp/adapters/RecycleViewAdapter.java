@@ -13,9 +13,13 @@ import com.example.infinitimeapp.MainActivity;
 import com.example.infinitimeapp.R;
 import com.example.infinitimeapp.bluetooth.BluetoothCallback;
 import com.example.infinitimeapp.bluetooth.BluetoothDevices;
+import com.example.infinitimeapp.bluetooth.BluetoothService;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.ViewHolder> implements View.OnClickListener {
     private Context context;
@@ -51,10 +55,10 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        BluetoothDevice device = devices.getDevices().get(position);
+        BluetoothDevices.BTDeviceModel device = devices.getDeviceFromIndex(position);
 
-        holder.alias.setText(device.getAlias());
-        holder.mac.setText(device.getAddress());
+        holder.alias.setText(device.name);
+        holder.mac.setText(device.mac);
         holder.image.setImageResource(R.drawable.watch);
     }
 
@@ -66,8 +70,8 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
     @Override
     public void onClick(View v) {
         int index = MainActivity.recyclerView.getChildLayoutPosition(v);
-        BluetoothDevice device = devices.getDeviceFromIndex(index);
+        BluetoothDevices.BTDeviceModel device = devices.getDeviceFromIndex(index);
         Toast.makeText(context, "Trying to connect to watch", Toast.LENGTH_LONG).show();
-        device.connectGatt(context, true, gattCallback);
+        BluetoothService.getInstance().connect(device.mac);
     }
 }

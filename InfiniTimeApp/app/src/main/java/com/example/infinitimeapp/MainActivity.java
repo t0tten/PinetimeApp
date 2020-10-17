@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
@@ -15,26 +16,30 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.infinitimeapp.adapters.RecycleViewAdapter;
-import com.example.infinitimeapp.bluetooth.PinetimeScanner;
+import com.example.infinitimeapp.bluetooth.BluetoothDevices;
+import com.example.infinitimeapp.bluetooth.BluetoothService;
 
 public class MainActivity extends AppCompatActivity {
     private boolean isStarted = false;
     static final int REQUEST_ENABLE_BT = 1;
-    private BluetoothGatt gatt;
-    private PinetimeScanner pinetimeScanner = new PinetimeScanner(MainActivity.this);
 
     public static RecyclerView recyclerView;
     public static RecycleViewAdapter mAdapter;
+    BluetoothService mBluetoothService = BluetoothService.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mBluetoothService.init(this);
         setContentView(R.layout.activity_main);
 
         final Button button = findViewById(R.id.scanButton);
         button.setOnClickListener(v -> {
             Toast.makeText(MainActivity.this, "Looking for Pinetime watches nearby", Toast.LENGTH_LONG).show();
-            pinetimeScanner.beginScan();
+            //pinetimeScanner.beginScan();
+            mBluetoothService.scan();
+            BluetoothDevices.getInstance().clear();
         });
 
         recyclerView = (RecyclerView) findViewById(R.id.devicesList);
@@ -45,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(!isStarted) {
             isStarted = true;
+
             final BluetoothManager bluetoothManager =
                     (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
@@ -57,11 +63,8 @@ public class MainActivity extends AppCompatActivity {
     }
     
     @Override
-    public void onBackPressed() {
-        if (gatt == null) {
-            return;
-        }
-        gatt.close();
-        gatt = null;
+    public void onDestroy() {
+        mBluetoothService.teardown();
+        super.onDestroy();
     }
 }

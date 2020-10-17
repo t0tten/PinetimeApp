@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.example.infinitimeapp"
         minSdkVersion 24
-        targetSdkVersion 21
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
 
@@ -37,4 +37,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+    implementation "com.polidea.rxandroidble2:rxandroidble:1.11.1"
 }

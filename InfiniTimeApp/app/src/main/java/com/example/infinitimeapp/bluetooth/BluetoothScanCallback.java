@@ -9,6 +9,7 @@ import com.example.infinitimeapp.MainActivity;
 import static com.example.infinitimeapp.common.Constants.*;
 
 public class BluetoothScanCallback extends ScanCallback {
+
     private final BluetoothDevices bluetoothDevices;
 
     public BluetoothScanCallback() {
@@ -20,7 +21,7 @@ public class BluetoothScanCallback extends ScanCallback {
         super.onScanResult(callbackType, result);
         //Log.i(TAG, "Found: " + result.getDevice().getAlias() + ", Address: " + result.getDevice().getAddress());
         if("InfiniTime".equals(result.getDevice().getAlias())) {
-            bluetoothDevices.addDevice(result.getDevice());
+            //bluetoothDevices.addDevice(result.getDevice());
             MainActivity.mAdapter.notifyDataSetChanged();
         }
     }

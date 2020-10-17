@@ -2,11 +2,25 @@ package com.example.infinitimeapp.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 
+import com.example.infinitimeapp.MainActivity;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BluetoothDevices {
+    public static class BTDeviceModel {
+        public String name;
+        public String mac;
+
+        public BTDeviceModel(String mac, String name) {
+            this.name = name;
+            this.mac = mac;
+        }
+    }
+
     private static BluetoothDevices instance = new BluetoothDevices();
-    private final ArrayList<BluetoothDevice> deviceList;
+    private final ArrayList<BTDeviceModel> deviceList;
 
     private BluetoothDevices() {
         deviceList = new ArrayList<>();
@@ -16,33 +30,32 @@ public class BluetoothDevices {
         return instance;
     }
 
-    public ArrayList<BluetoothDevice> getDevices(){
+    public ArrayList<BTDeviceModel> getDevices(){
         return this.deviceList;
     }
 
-    public void addDevice(BluetoothDevice device) {
-        if(!deviceList.contains(device)) {
-            deviceList.add(device);
-        }
-    }
-
-    public BluetoothDevice getDeviceFromAddress(String address) {
-        BluetoothDevice btDevice = null;
-
-        for (BluetoothDevice device : deviceList) {
-            if(device.getAddress().equals(address)) {
-                btDevice = device;
-                break;
+    public void addDevice(BTDeviceModel device) {
+        for(BTDeviceModel d: deviceList) {
+            if(d.mac.equals(device.mac)) {
+                return;
             }
         }
-        return btDevice;
+
+        deviceList.add(device);
+
+        MainActivity.mAdapter.notifyDataSetChanged();
     }
 
-    public BluetoothDevice getDeviceFromIndex(int index) {
+    public BTDeviceModel getDeviceFromIndex(int index) {
         return deviceList.get(index);
     }
 
     public int getSize() {
         return this.deviceList.size();
+    }
+
+    public void clear() {
+        deviceList.clear();
+        MainActivity.mAdapter.notifyDataSetChanged();
     }
 }
