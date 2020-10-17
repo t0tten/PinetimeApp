@@ -16,7 +16,7 @@ public class PinetimeScanner {
     private boolean isScanning = false;
 
     public PinetimeScanner(Context context) {
-        scanCallback = new BluetoothScanCallback(context);
+        scanCallback = new BluetoothScanCallback();
         handler = new Handler();
         SCANNER = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
     }

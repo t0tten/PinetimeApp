@@ -21,7 +21,9 @@ public class BluetoothDevices {
     }
 
     public void addDevice(BluetoothDevice device) {
-        deviceList.add(device);
+        if(!deviceList.contains(device)) {
+            deviceList.add(device);
+        }
     }
 
     public BluetoothDevice getDeviceFromAddress(String address) {
@@ -34,5 +36,13 @@ public class BluetoothDevices {
             }
         }
         return btDevice;
+    }
+
+    public BluetoothDevice getDeviceFromIndex(int index) {
+        return deviceList.get(index);
+    }
+
+    public int getSize() {
+        return this.deviceList.size();
     }
 }
