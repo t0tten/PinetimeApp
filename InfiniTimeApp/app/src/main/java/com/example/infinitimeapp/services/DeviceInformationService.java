@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DeviceInformationService implements PinetimeService {
-    public static final UUID SERVICE_UUID = UUID.fromString("0000180a-0000-1000-8000-00805f9b34fb");
-
     public static final String MANUFACTURER = "MANUFACTURER";
     public static final String MODEL = "MODEL";
     public static final String SERIAL = "SERIAL";

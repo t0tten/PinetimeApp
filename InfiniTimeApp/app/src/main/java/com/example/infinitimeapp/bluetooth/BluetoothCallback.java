@@ -8,6 +8,8 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
+import com.example.infinitimeapp.common.Constants;
+import com.example.infinitimeapp.services.CurrentTimeService;
 import com.example.infinitimeapp.services.DeviceInformationService;
 import com.example.infinitimeapp.services.PinetimeService;
 
@@ -67,7 +69,7 @@ public class BluetoothCallback extends BluetoothGattCallback {
             Log.i(TAG, "onServicesDiscovered received: GATT_SUCCESS\n");
 
             PinetimeService pinetimeService = new DeviceInformationService();
-            BluetoothGattService devInfoService = gatt.getService(DeviceInformationService.SERVICE_UUID);
+            BluetoothGattService devInfoService = gatt.getService(Constants.DEVICE_INFO_SERVICE);
             BluetoothGattCharacteristic bgc = devInfoService.getCharacteristic(pinetimeService.getCharacteristicUUID(DeviceInformationService.FW_REVISION_ID));
 
             Log.i(TAG, "Asking watch about Device Information:");
@@ -86,6 +88,8 @@ public class BluetoothCallback extends BluetoothGattCallback {
         PinetimeService pinetimeService = null;
         if(DEVICE_INFO_SERVICE.equals(serviceUUID)) {
             pinetimeService = new DeviceInformationService();
+        } else if(CURRENT_TIME_SERVICE.equals(serviceUUID)) {
+            pinetimeService = new CurrentTimeService();
         }
 
         String characteristicName = pinetimeService.getCharacteristicName(characteristic.getUuid());
