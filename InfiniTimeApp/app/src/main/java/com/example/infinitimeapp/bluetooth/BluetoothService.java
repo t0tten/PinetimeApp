@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.example.infinitimeapp.MainActivity;
+import com.example.infinitimeapp.services.CurrentTimeService;
 import com.example.infinitimeapp.services.DeviceInformationService;
+import com.example.infinitimeapp.services.PinetimeService;
 import com.polidea.rxandroidble2.RxBleClient;
 import com.polidea.rxandroidble2.RxBleConnection;
 import com.polidea.rxandroidble2.RxBleDevice;
@@ -23,7 +25,7 @@ public class BluetoothService {
 
     private static BluetoothService instance = null;
 
-    RxBleClient mRxBleClient;
+        RxBleClient mRxBleClient;
     Context mContext;
     Disposable mScanSubscription = null;
     Disposable mConnectionDisposable = null;
@@ -97,25 +99,18 @@ public class BluetoothService {
                         }
                 );
 
-
-        /*mConnectionDisposable =  mConnectedDevice.establishConnection(false)
-                .flatMapSingle(rxBleConnection -> rxBleConnection.readCharacteristic(UUID.fromString("00002a26-0000-1000-8000-00805f9b34fb")))
-                .subscribe(
-                        characteristicValue -> {
-                            Log.i(TAG, characteristicValue.toString());
-                        },
-                        throwable -> {
-                            Log.e(TAG, throwable.getStackTrace().toString());
-                        }
-                );*/
-
         mConnectionDisposable = mConnectedDevice.establishConnection(true)
                 .subscribe(
                         rxBleConnection -> {
                             Log.i(TAG, "Connected to " + macAddresss);
                             mConnection = rxBleConnection;
 
-                            read(UUID.fromString("00002a26-0000-1000-8000-00805f9b34fb"));
+                            //read(UUID.fromString("00002a26-0000-1000-8000-00805f9b34fb"));
+                            DeviceInformationService s = new DeviceInformationService();
+                            s.getHwRevisionId();
+                            s.getFwRevisionId();
+                            s.getManufaturer();
+                            s.getSerial();
                         },
                         throwable -> {
                             Log.e(TAG, "Error connecting: " + throwable);
@@ -136,10 +131,10 @@ public class BluetoothService {
         stopConnection();
     }
 
-    public void read(UUID characteristicUUID) {
+    public void read(UUID characteristicUUID, PinetimeService service) {
         mConnection.readCharacteristic(characteristicUUID).subscribe(
                 characteristicValue -> {
-                    Log.i(TAG, characteristicValue.toString());
+                    service.onDataRecieved(characteristicUUID, characteristicValue);
                 },
                 throwable -> {
                     Log.e(TAG, throwable.toString());

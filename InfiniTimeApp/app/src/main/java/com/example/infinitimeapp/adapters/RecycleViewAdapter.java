@@ -1,6 +1,5 @@
 package com.example.infinitimeapp.adapters;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,20 +10,15 @@ import android.widget.Toast;
 
 import com.example.infinitimeapp.MainActivity;
 import com.example.infinitimeapp.R;
-import com.example.infinitimeapp.bluetooth.BluetoothCallback;
 import com.example.infinitimeapp.bluetooth.BluetoothDevices;
 import com.example.infinitimeapp.bluetooth.BluetoothService;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.ViewHolder> implements View.OnClickListener {
     private Context context;
     BluetoothDevices devices;
-    private final BluetoothCallback gattCallback;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView alias, mac;
@@ -41,7 +35,6 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
     public RecycleViewAdapter(Context ct) {
         context = ct;
         devices = BluetoothDevices.getInstance();
-        gattCallback = new BluetoothCallback();
     }
 
     @NonNull
