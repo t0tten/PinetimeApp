@@ -11,7 +11,6 @@ import android.util.Log;
 import com.example.infinitimeapp.services.DeviceInformationService;
 import com.example.infinitimeapp.services.PinetimeService;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -66,30 +65,6 @@ public class BluetoothCallback extends BluetoothGattCallback {
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
         if (status == BluetoothGatt.GATT_SUCCESS) {
             Log.i(TAG, "onServicesDiscovered received: GATT_SUCCESS\n");
-            ArrayList<BluetoothGattService> services = new ArrayList<>(gatt.getServices());
-            for(BluetoothGattService service : services) {
-                //Log.i(TAG, "Service: " + service.getUuid().toString());
-                ArrayList<BluetoothGattCharacteristic> characteristics = new ArrayList<>(service.getCharacteristics());
-                for (BluetoothGattCharacteristic characteristic : characteristics) {
-                    String uuid_str = characteristic.getUuid().toString();
-                    //Log.i(TAG, "\tUUID: " + uuid_str);
-                    if (uuid_str.contains("00002a2b")) {
-                        //Log.i(TAG, "\tCLOCK: ");
-
-                        // Attempt to write time
-                                    /*if(characteristic.setValue(getCurrentTime())) {
-                                        Log.i(TAG, "\t\tSaved value!");
-                                        if (gatt.writeCharacteristic(characteristic)) {
-                                            Log.i(TAG, "\t\tNew value sent!!");
-                                        } else {
-                                            Log.i(TAG, "\t\tFUCK OFF AND DIE!");
-                                        }
-                                    }*/
-                    }
-                    //Log.i(TAG, "\tPERMISSION: " + characteristic.getPermissions());
-                    //Log.i(TAG, "\tPROPERTIES: " + characteristic.getProperties());
-                }
-            }
 
             PinetimeService pinetimeService = new DeviceInformationService();
             BluetoothGattService devInfoService = gatt.getService(DeviceInformationService.SERVICE_UUID);
@@ -99,7 +74,6 @@ public class BluetoothCallback extends BluetoothGattCallback {
             if(!gatt.readCharacteristic(bgc)) {
                 Log.i(TAG, "Could not send read request ...");
             }
-
         } else {
             Log.i(TAG, "onServicesDiscovered received: " + status);
         }
@@ -112,7 +86,6 @@ public class BluetoothCallback extends BluetoothGattCallback {
         PinetimeService pinetimeService = null;
         if(DEVICE_INFO_SERVICE.equals(serviceUUID)) {
             pinetimeService = new DeviceInformationService();
-
         }
 
         String characteristicName = pinetimeService.getCharacteristicName(characteristic.getUuid());
