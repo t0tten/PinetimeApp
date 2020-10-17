@@ -8,16 +8,16 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
-import com.example.infinitimeapp.Constants;
+import com.example.infinitimeapp.services.DeviceInformationService;
+import com.example.infinitimeapp.services.PinetimeService;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
-public class BluetoothCallback extends BluetoothGattCallback {
+import static com.example.infinitimeapp.common.Constants.*;
 
+public class BluetoothCallback extends BluetoothGattCallback {
 
     private byte ConvertDecimal2BCD(byte decimal) {
         byte result = 0;
@@ -41,13 +41,13 @@ public class BluetoothCallback extends BluetoothGattCallback {
 
     @Override
     public void onPhyUpdate(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
-        Log.i(Constants.TAG, "onPhyRead");
+        Log.i(TAG, "onPhyRead");
         super.onPhyUpdate(gatt, txPhy, rxPhy, status);
     }
 
     @Override
     public void onPhyRead(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
-        Log.i(Constants.TAG, "onPhyRead");
+        Log.i(TAG, "onPhyRead");
         super.onPhyRead(gatt, txPhy, rxPhy, status);
     }
 
@@ -55,17 +55,17 @@ public class BluetoothCallback extends BluetoothGattCallback {
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
         if (newState == BluetoothProfile.STATE_CONNECTED) {
             if(!gatt.discoverServices()) {
-                Log.i(Constants.TAG, "Could not connect to Watch ...");
+                Log.i(TAG, "Could not connect to Watch ...");
             }
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            Log.i(Constants.TAG, "Disconnected from GATT server.");
+            Log.i(TAG, "Disconnected from GATT server.");
         }
     }
 
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
         if (status == BluetoothGatt.GATT_SUCCESS) {
-            Log.i(Constants.TAG, "onServicesDiscovered received: GATT_SUCCESS\n");
+            Log.i(TAG, "onServicesDiscovered received: GATT_SUCCESS\n");
             ArrayList<BluetoothGattService> services = new ArrayList<>(gatt.getServices());
             for(BluetoothGattService service : services) {
                 //Log.i(TAG, "Service: " + service.getUuid().toString());
@@ -91,58 +91,55 @@ public class BluetoothCallback extends BluetoothGattCallback {
                 }
             }
 
-            BluetoothGattService devInfoService = gatt.getService(DEVICE_INFO_SERVICE);
-            ArrayList<BluetoothGattCharacteristic> devInfoChars = new ArrayList<>();
-            //devInfoChars.add(devInfoService.getCharacteristic(UUID.fromString(DEVICE_INFO_CHAR_MAP.get(MANUFACTURER))));
-            //devInfoChars.add(devInfoService.getCharacteristic(UUID.fromString(DEVICE_INFO_CHAR_MAP.get(MODEL))));
-            //devInfoChars.add(devInfoService.getCharacteristic(UUID.fromString(DEVICE_INFO_CHAR_MAP.get(SERIAL))));
-            devInfoChars.add(devInfoService.getCharacteristic(UUID.fromString(DEVICE_INFO_CHAR_MAP.get(FW_REVISION_ID))));
-            //devInfoChars.add(devInfoService.getCharacteristic(UUID.fromString(DEVICE_INFO_CHAR_MAP.get(HW_REVISION_ID))));
-            //devInfoChars.add(devInfoService.getCharacteristic(UUID.fromString(DEVICE_INFO_CHAR_MAP.get(SW_REVISION_ID))));
+            PinetimeService pinetimeService = new DeviceInformationService();
+            BluetoothGattService devInfoService = gatt.getService(DeviceInformationService.SERVICE_UUID);
+            BluetoothGattCharacteristic bgc = devInfoService.getCharacteristic(pinetimeService.getCharacteristicUUID(DeviceInformationService.FW_REVISION_ID));
 
-            for(BluetoothGattCharacteristic characteristic : devInfoChars) {
-                Log.i(Constants.TAG, "Asking watch about Device Information:");
-                if(!gatt.readCharacteristic(characteristic)) {
-                    Log.i(Constants.TAG, "Could not send read request ...");
-                }
+            Log.i(TAG, "Asking watch about Device Information:");
+            if(!gatt.readCharacteristic(bgc)) {
+                Log.i(TAG, "Could not send read request ...");
             }
 
         } else {
-            Log.i(Constants.TAG, "onServicesDiscovered received: " + status);
+            Log.i(TAG, "onServicesDiscovered received: " + status);
         }
     }
 
     @Override
     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-        Optional<String> key = DEVICE_INFO_CHAR_MAP.entrySet().stream()
-                .filter(e -> e.getValue().equals(characteristic.getUuid().toString()))
-                .map(Map.Entry::getKey)
-                .findFirst();
+        UUID serviceUUID = characteristic.getService().getUuid();
 
-        Log.i(Constants.TAG, "Answer for " + key.get() + " request, STATUS: " + status);
-        Log.i(Constants.TAG, "\tBYTE VALUE: " + characteristic.getValue().toString());
-        Log.i(Constants.TAG, "\tSTRING-VALUE: " + new String(characteristic.getValue()));
+        PinetimeService pinetimeService = null;
+        if(DEVICE_INFO_SERVICE.equals(serviceUUID)) {
+            pinetimeService = new DeviceInformationService();
+
+        }
+
+        String characteristicName = pinetimeService.getCharacteristicName(characteristic.getUuid());
+        Log.i(TAG, "Answer for " + characteristicName + " request, STATUS: " + status);
+        Log.i(TAG, "\tBYTE VALUE: " + characteristic.getValue().toString());
+        Log.i(TAG, "\tSTRING-VALUE: " + new String(characteristic.getValue()));
         super.onCharacteristicRead(gatt, characteristic, status);
     }
 
     @Override
     public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-        Log.i(Constants.TAG, "Write: " + characteristic.getUuid().toString() + " with status of " + status);
+        Log.i(TAG, "Write: " + characteristic.getUuid().toString() + " with status of " + status);
     }
 
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-        Log.i(Constants.TAG, "Change: " + characteristic.getUuid().toString());
+        Log.i(TAG, "Change: " + characteristic.getUuid().toString());
     }
 
     @Override
     public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-        Log.i(Constants.TAG, "DescriptorRead: " + descriptor.getUuid().toString());
+        Log.i(TAG, "DescriptorRead: " + descriptor.getUuid().toString());
     }
 
     @Override
     public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-        Log.i(Constants.TAG, "DescriptorWrite: " + descriptor.getUuid().toString());
+        Log.i(TAG, "DescriptorWrite: " + descriptor.getUuid().toString());
     }
 
     @Override
