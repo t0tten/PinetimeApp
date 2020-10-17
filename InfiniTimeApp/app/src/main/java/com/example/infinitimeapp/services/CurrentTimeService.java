@@ -15,20 +15,13 @@ import java.util.stream.Stream;
 
 import static com.example.infinitimeapp.common.Constants.TAG;
 
-public class CurrentTimeService implements PinetimeService {
+public class CurrentTimeService extends BaseService {
     private static final String CURRENT_TIME = "CURRENT_TIME";
-    private static final Map<String, String> CHAR_MAP = Stream.of(new String[][]{
-            {CURRENT_TIME, "00002a2b-0000-1000-8000-00805f9b34fb"}
-    }).collect(Collectors.toMap(p -> p[0], p -> p[1]));
 
-    @Override
-    public String getCharacteristicName(UUID characteristicUUID) {
-        return CURRENT_TIME;
-    }
-
-    @Override
-    public UUID getCharacteristicUUID(String characteristicName) {
-        return UUID.fromString(CHAR_MAP.get(characteristicName));
+    public CurrentTimeService() {
+        CHAR_MAP = Stream.of(new String[][]{
+                {CURRENT_TIME, "00002a2b-0000-1000-8000-00805f9b34fb"}
+        }).collect(Collectors.toMap(p -> p[0], p -> p[1]));
     }
 
     @Override
