@@ -4,11 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -16,24 +13,25 @@ import com.example.infinitimeapp.adapters.RecycleViewAdapter;
 import com.example.infinitimeapp.bluetooth.BluetoothDevices;
 import com.example.infinitimeapp.bluetooth.BluetoothService;
 
-public class MainActivity extends AppCompatActivity {
-    private boolean isStarted = false;
-    static final int REQUEST_ENABLE_BT = 1;
+import static com.example.infinitimeapp.common.Constants.DELAY_IN_MILLIS;
 
+public class ScanActivity extends AppCompatActivity {
+    private boolean isStarted = false;
     public static RecyclerView recyclerView;
     public static RecycleViewAdapter mAdapter;
     BluetoothService mBluetoothService = BluetoothService.getInstance();
+    Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_scan);
 
         mBluetoothService.init(this);
 
         final Button button = findViewById(R.id.scanButton);
         button.setOnClickListener(v -> {
-            Toast.makeText(MainActivity.this, "Looking for Pinetime watches nearby", Toast.LENGTH_LONG).show();
+            Toast.makeText(ScanActivity.this, "Looking for Pinetime watches nearby", Toast.LENGTH_LONG).show();
             mBluetoothService.scan();
             BluetoothDevices.getInstance().clear();
         });
@@ -44,23 +42,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setClickable(true);
 
-        if(!isStarted) {
-            isStarted = true;
-
-            final BluetoothManager bluetoothManager =
-                    (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-            BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
-
-            if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(BluetoothService.getInstance().isConnected()) {
+                    finish();
+                }
+                handler.postDelayed(this, DELAY_IN_MILLIS);
             }
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        mBluetoothService.teardown();
-        super.onDestroy();
+        }, DELAY_IN_MILLIS);
     }
 }

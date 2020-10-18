@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.infinitimeapp.MainActivity;
+import com.example.infinitimeapp.ScanActivity;
 import com.example.infinitimeapp.R;
 import com.example.infinitimeapp.bluetooth.BluetoothDevices;
 import com.example.infinitimeapp.bluetooth.BluetoothService;
@@ -62,7 +62,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
     @Override
     public void onClick(View v) {
-        int index = MainActivity.recyclerView.getChildLayoutPosition(v);
+        int index = ScanActivity.recyclerView.getChildLayoutPosition(v);
         BluetoothDevices.BTDeviceModel device = devices.getDeviceFromIndex(index);
         Toast.makeText(context, "Trying to connect to watch", Toast.LENGTH_LONG).show();
         BluetoothService.getInstance().connect(device.mac);

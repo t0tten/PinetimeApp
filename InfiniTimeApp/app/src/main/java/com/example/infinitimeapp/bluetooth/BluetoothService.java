@@ -1,11 +1,10 @@
 package com.example.infinitimeapp.bluetooth;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
-import com.example.infinitimeapp.MainActivity;
-import com.example.infinitimeapp.WatchActivity;
+import com.example.infinitimeapp.ScanActivity;
+import com.example.infinitimeapp.common.Utils;
 import com.example.infinitimeapp.services.PinetimeService;
 import com.polidea.rxandroidble2.RxBleClient;
 import com.polidea.rxandroidble2.RxBleConnection;
@@ -28,14 +27,16 @@ public class BluetoothService {
     Disposable mConnectionDisposable = null;
     RxBleDevice mConnectedDevice = null;
     RxBleConnection mConnection = null;
+    boolean isConnected;
 
-    private BluetoothService() {}
+    private BluetoothService() {
+        isConnected = false;
+    }
 
     public static BluetoothService getInstance()
     {
         if (instance == null)
             instance = new BluetoothService();
-
         return instance;
     }
 
@@ -63,8 +64,7 @@ public class BluetoothService {
 
                                 BluetoothDevices.BTDeviceModel d = new BluetoothDevices.BTDeviceModel(device.getMacAddress(), device.getName());
                                 BluetoothDevices.getInstance().addDevice(d);
-                                MainActivity.mAdapter.notifyDataSetChanged();
-
+                                ScanActivity.mAdapter.notifyDataSetChanged();
                             }
                         },
                         throwable -> {
@@ -92,12 +92,7 @@ public class BluetoothService {
                             Log.i(TAG, connectionState.toString());
 
                             if(connectionState == RxBleConnection.RxBleConnectionState.CONNECTED) {
-                                try {
-                                    Intent intent = new Intent(mContext.getApplicationContext(), WatchActivity.class);
-                                    mContext.startActivity(intent);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                isConnected = true;
                             }
                         },
                         throwable -> {
@@ -126,6 +121,7 @@ public class BluetoothService {
     }
 
     public void teardown() {
+        isConnected = false;
         stopScanning();
         stopConnection();
     }
@@ -157,8 +153,9 @@ public class BluetoothService {
                     Log.e(TAG, throwable.toString());
                 }
         );
-
     }
 
-
+    public boolean isConnected() {
+        return isConnected;
+    }
 }
