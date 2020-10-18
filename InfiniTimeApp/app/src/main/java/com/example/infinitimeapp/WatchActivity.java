@@ -19,6 +19,7 @@ import com.example.infinitimeapp.bluetooth.BluetoothService;
 import com.example.infinitimeapp.database.Database;
 import com.example.infinitimeapp.services.AlertNotificationService;
 import com.example.infinitimeapp.services.DeviceInformationService;
+import com.example.infinitimeapp.services.MusicService;
 
 import androidx.annotation.Nullable;
 
@@ -123,17 +124,22 @@ public class WatchActivity extends Activity {
                 if(!track.isEmpty()) {
                     // Update Track info
                     musicTrack.setText("");
+                    MusicService.getInstance().sendTrack(track);
                 }
 
                 if(!artist.isEmpty()) {
                     // Update Artist info
                     musicArtist.setText("");
+                    MusicService.getInstance().sendArtist(artist);
                 }
 
                 if(!album.isEmpty()) {
                     // Update Album info
                     musicAlbum.setText("");
+                    MusicService.getInstance().sendAlbum(album);
                 }
+                MusicService.getInstance().sendStatus(true);
+
                 showToast("Sending music information");
             }
         });

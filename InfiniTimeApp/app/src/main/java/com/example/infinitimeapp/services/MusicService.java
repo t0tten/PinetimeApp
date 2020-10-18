@@ -1,5 +1,8 @@
 package com.example.infinitimeapp.services;
 
+import com.example.infinitimeapp.bluetooth.BluetoothService;
+
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -77,5 +80,32 @@ public class MusicService extends BaseService {
             case EVENT_MUSIC_VOLDOWN:
                 break;
         }
+    }
+
+    public void sendTrack(String track) {
+        send(getCharacteristicUUID(TRACK), track);
+    }
+
+    public void sendArtist(String artist) {
+        send(getCharacteristicUUID(ARTIST), artist);
+    }
+
+    public void sendAlbum(String album) {
+        send(getCharacteristicUUID(ALBUM), album);
+    }
+
+    public void sendStatus(boolean isPlaying) {
+        send(getCharacteristicUUID(STATUS), isPlaying);
+    }
+
+    private void send(UUID characteristic, String message) {
+        BluetoothService.getInstance().write(characteristic, message.getBytes());
+    }
+
+    private void send(UUID characteristic, boolean isPlaying) {
+        byte[] test = new byte[2];
+        test[0] = (byte)(isPlaying ? 1 : 0);
+        test[1] = '\0';
+        BluetoothService.getInstance().write(characteristic, test);
     }
 }
