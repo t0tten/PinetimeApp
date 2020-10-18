@@ -122,14 +122,17 @@ public class WatchActivity extends Activity {
 
                 if(!track.isEmpty()) {
                     // Update Track info
+                    musicTrack.setText("");
                 }
 
                 if(!artist.isEmpty()) {
                     // Update Artist info
+                    musicArtist.setText("");
                 }
 
                 if(!album.isEmpty()) {
                     // Update Album info
+                    musicAlbum.setText("");
                 }
                 showToast("Sending music information");
             }
@@ -206,6 +209,7 @@ public class WatchActivity extends Activity {
                 Intent intent = new Intent(getApplicationContext(), ScanActivity.class);
                 startActivity(intent);
             } else {
+                showToast("Attempting to connect to:\n" + MAC_Address);
                 BluetoothService.getInstance().init(this);
                 BluetoothService.getInstance().connect(MAC_Address);
                 enableDisableUI(true);

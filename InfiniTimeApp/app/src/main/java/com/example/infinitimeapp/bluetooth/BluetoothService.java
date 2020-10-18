@@ -2,6 +2,7 @@ package com.example.infinitimeapp.bluetooth;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.infinitimeapp.database.Database;
 import com.example.infinitimeapp.ScanActivity;

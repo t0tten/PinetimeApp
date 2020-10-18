@@ -18,8 +18,6 @@
         </activity>
         <activity android:name=".ScanActivity">
         </activity>
-
-        <receiver android:name=".WatchActivity" />
     </application>
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
