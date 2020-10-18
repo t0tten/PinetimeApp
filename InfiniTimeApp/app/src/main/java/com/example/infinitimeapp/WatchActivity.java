@@ -16,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
-import com.example.infinitimeapp.common.Utils;
 import com.example.infinitimeapp.services.AlertNotificationService;
 import com.example.infinitimeapp.services.DeviceInformationService;
 
@@ -46,8 +45,11 @@ public class WatchActivity extends Activity {
     AlertNotificationService alertNotificationService = AlertNotificationService.getInstance();
 
     Handler handler = new Handler();
+    Database database = new Database(this);
+
     static boolean connectionState = true;
     static final int REQUEST_ENABLE_BT = 1;
+    public static String MAC_Address = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,6 +87,7 @@ public class WatchActivity extends Activity {
                 showToast("Disconnecting from watch");
                 connectionState = false;
                 enableDisableUI(false);
+                database.removeMacFromDatabase();
             }
         });
 
@@ -98,6 +101,7 @@ public class WatchActivity extends Activity {
                     return;
                 }
                 showToast("Sending alert: " + message);
+                alertMessage.setText("");
                 alertNotificationService.sendMessage(message);
             }
         });
@@ -195,11 +199,18 @@ public class WatchActivity extends Activity {
         super.onStart();
         if(!BluetoothService.getInstance().isConnected()) {
             enableDisableUI(false);
-            Intent intent = new Intent(getApplicationContext(), ScanActivity.class);
-            startActivity(intent);
+
+            MAC_Address = database.readMACFromDatabase();
+            if(MAC_Address.isEmpty()) {
+                Intent intent = new Intent(getApplicationContext(), ScanActivity.class);
+                startActivity(intent);
+            } else {
+                BluetoothService.getInstance().init(this);
+                BluetoothService.getInstance().connect(MAC_Address);
+                enableDisableUI(true);
+            }
         } else {
             enableDisableUI(true);
-            Utils.init();
         }
     }
 }

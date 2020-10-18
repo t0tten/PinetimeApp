@@ -1,9 +1,12 @@
 package com.example.infinitimeapp.bluetooth;
 
 import android.content.Context;
+import android.provider.ContactsContract;
 import android.util.Log;
 
+import com.example.infinitimeapp.Database;
 import com.example.infinitimeapp.ScanActivity;
+import com.example.infinitimeapp.WatchActivity;
 import com.example.infinitimeapp.common.Utils;
 import com.example.infinitimeapp.services.PinetimeService;
 import com.polidea.rxandroidble2.RxBleClient;
@@ -90,10 +93,6 @@ public class BluetoothService {
                 .subscribe(
                         connectionState -> {
                             Log.i(TAG, connectionState.toString());
-
-                            if(connectionState == RxBleConnection.RxBleConnectionState.CONNECTED) {
-                                isConnected = true;
-                            }
                         },
                         throwable -> {
                             Log.e(TAG, "Error reading connection state: " + throwable);
@@ -105,6 +104,12 @@ public class BluetoothService {
                         rxBleConnection -> {
                             Log.i(TAG, "Connected to " + macAddresss);
                             mConnection = rxBleConnection;
+                            isConnected = true;
+                            if(WatchActivity.MAC_Address.isEmpty()) {
+                                Database database = new Database(mContext);
+                                database.saveMACToDatabase(macAddresss);
+                            }
+                            Utils.init();
                         },
                         throwable -> {
                             Log.e(TAG, "Error connecting: " + throwable);

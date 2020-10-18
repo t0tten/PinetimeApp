@@ -1,9 +1,5 @@
 package com.example.infinitimeapp.services;
 
-import android.content.Intent;
-
-import com.example.infinitimeapp.WatchActivity;
-
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

@@ -2,7 +2,7 @@
     <string name="app_name">Pinetime Infinitime Communicator</string>
 
     <string name="scan_button">Scan</string>
-    <string name="disconnect_button">Disconnect</string>
+    <string name="disconnect_button">Forget watch</string>
     <string name="tap_info">Tap on a row to connect</string>
 
     <string name="dev_info">Device information</string>
