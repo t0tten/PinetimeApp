@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
+import com.example.infinitimeapp.database.Database;
 import com.example.infinitimeapp.services.AlertNotificationService;
 import com.example.infinitimeapp.services.DeviceInformationService;
 

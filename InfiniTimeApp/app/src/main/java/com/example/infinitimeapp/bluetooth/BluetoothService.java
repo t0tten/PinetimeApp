@@ -1,10 +1,9 @@
 package com.example.infinitimeapp.bluetooth;
 
 import android.content.Context;
-import android.provider.ContactsContract;
 import android.util.Log;
 
-import com.example.infinitimeapp.Database;
+import com.example.infinitimeapp.database.Database;
 import com.example.infinitimeapp.ScanActivity;
 import com.example.infinitimeapp.WatchActivity;
 import com.example.infinitimeapp.common.Utils;

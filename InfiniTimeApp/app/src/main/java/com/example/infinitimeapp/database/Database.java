@@ -1,4 +1,4 @@
-package com.example.infinitimeapp;
+package com.example.infinitimeapp.database;
 
 import android.content.ContentValues;
 import android.content.Context;
