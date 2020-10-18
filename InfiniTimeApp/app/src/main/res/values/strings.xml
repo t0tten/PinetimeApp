@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">InfiniTimeApp</string>
     <string name="scan_button">Scan</string>
+    <string name="disconnect_button">Disconnect</string>
+
+    <string name="manufacturer">Manufacturer: </string>
+    <string name="model">Model Number: </string>
+    <string name="serial">Serial Number: </string>
+    <string name="fw_revision">FW_REVISION: </string>
+    <string name="hw_revision">HW_REVISION: </string>
+    <string name="sw_revision">SW_REVISION: </string>
 </resources>

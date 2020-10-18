@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
     public static RecyclerView recyclerView;
     public static RecycleViewAdapter mAdapter;
     BluetoothService mBluetoothService = BluetoothService.getInstance();
-    public static BluetoothGatt gatt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

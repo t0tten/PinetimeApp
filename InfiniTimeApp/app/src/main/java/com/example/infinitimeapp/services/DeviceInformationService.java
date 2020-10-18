@@ -1,14 +1,16 @@
 package com.example.infinitimeapp.services;
 
-import android.util.Log;
+import android.content.Intent;
+
+import com.example.infinitimeapp.WatchActivity;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.example.infinitimeapp.common.Constants.TAG;
-
 public class DeviceInformationService extends BaseService {
+    private static final DeviceInformationService instance = new DeviceInformationService();
+
     private static final String MANUFACTURER = "MANUFACTURER";
     private static final String MODEL = "MODEL";
     private static final String SERIAL = "SERIAL";
@@ -16,7 +18,14 @@ public class DeviceInformationService extends BaseService {
     private static final String HW_REVISION_ID = "HW_REVISION_ID";
     private static final String SW_REVISION_ID = "SW_REVISION_ID";
 
-    public DeviceInformationService() {
+    public String mManufacturer = "";
+    public String mModel = "";
+    public String mSerial = "";
+    public String mFw_revision = "";
+    public String mHw_revision = "";
+    public String mSw_revision = "";
+
+    private DeviceInformationService() {
         CHAR_MAP = Stream.of(new String[][]{
                 {MANUFACTURER, "00002a29-0000-1000-8000-00805f9b34fb"},
                 {MODEL, "00002a24-0000-1000-8000-00805f9b34fb"},
@@ -31,22 +40,22 @@ public class DeviceInformationService extends BaseService {
     public void onDataRecieved(UUID characteristicName, byte[] message) {
         switch(getCharacteristicName(characteristicName)) {
             case MANUFACTURER:
-                Log.i(TAG, new String(message));
+                mManufacturer = new String(message);
                 break;
             case MODEL:
-                Log.i(TAG, new String(message));
+                mModel = new String(message);
                 break;
             case SERIAL:
-                Log.i(TAG, new String(message));
+                mSerial = new String(message);
                 break;
             case FW_REVISION_ID:
-                Log.i(TAG, new String(message));
+                mFw_revision = new String(message);
                 break;
             case HW_REVISION_ID:
-                Log.i(TAG, new String(message));
+                mHw_revision = new String(message);
                 break;
             case SW_REVISION_ID:
-                Log.i(TAG, new String(message));
+                mSw_revision = new String(message);
                 break;
             default:
         }
@@ -74,5 +83,9 @@ public class DeviceInformationService extends BaseService {
 
     public void getSwRevisionId() {
         read(SW_REVISION_ID);
+    }
+
+    public static DeviceInformationService getInstance() {
+        return instance;
     }
 }

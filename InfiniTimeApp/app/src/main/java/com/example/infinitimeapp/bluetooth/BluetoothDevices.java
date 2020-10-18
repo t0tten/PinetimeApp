@@ -1,12 +1,8 @@
 package com.example.infinitimeapp.bluetooth;
 
-import android.bluetooth.BluetoothDevice;
-
 import com.example.infinitimeapp.MainActivity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class BluetoothDevices {
     public static class BTDeviceModel {

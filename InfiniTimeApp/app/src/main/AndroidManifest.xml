@@ -17,9 +17,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".WatchActivity">
-
-
         </activity>
+
+        <receiver android:name=".WatchActivity" />
     </application>
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
