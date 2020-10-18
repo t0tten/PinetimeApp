@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +43,7 @@ public class WatchActivity extends Activity {
     Button disconnectButton;
     Button sendAlert;
     Button sendMusicInfo;
+    Switch playingButton;
 
     DeviceInformationService deviceInformationService = DeviceInformationService.getInstance();
     AlertNotificationService alertNotificationService = AlertNotificationService.getInstance();
@@ -114,6 +116,7 @@ public class WatchActivity extends Activity {
                 String track = musicTrack.getText().toString();
                 String artist = musicArtist.getText().toString();
                 String album = musicAlbum.getText().toString();
+                boolean isPlaying = playingButton.isChecked();
 
                 if(track.isEmpty() && artist.isEmpty() && album.isEmpty()) {
                     Log.e(TAG, "Message is empty");
@@ -138,8 +141,8 @@ public class WatchActivity extends Activity {
                     musicAlbum.setText("");
                     MusicService.getInstance().sendAlbum(album);
                 }
-                MusicService.getInstance().sendStatus(true);
 
+                MusicService.getInstance().sendStatus(isPlaying);
                 showToast("Sending music information");
             }
         });
@@ -161,6 +164,7 @@ public class WatchActivity extends Activity {
         disconnectButton = (Button) findViewById(R.id.button_disconnect);
         sendAlert = (Button) findViewById(R.id.button_alert);
         sendMusicInfo = (Button) findViewById(R.id.button_music);
+        playingButton = (Switch) findViewById(R.id.button_playing);
     }
 
     public void updateDeviceInformation() {
