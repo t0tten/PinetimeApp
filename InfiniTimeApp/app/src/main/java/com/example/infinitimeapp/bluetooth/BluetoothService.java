@@ -2,7 +2,6 @@ package com.example.infinitimeapp.bluetooth;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.infinitimeapp.database.Database;
 import com.example.infinitimeapp.ScanActivity;
@@ -54,7 +53,6 @@ public class BluetoothService {
             Log.e(TAG, "Error already scanning for bluetooth devices.");
             return;
         }
-
         Log.i(TAG, "Started scanning for bluetooth devices.");
         mScanSubscription = mRxBleClient.scanBleDevices(
                 new ScanSettings.Builder().build()
@@ -135,7 +133,6 @@ public class BluetoothService {
         if(mConnection == null) {
             return;
         }
-
         Disposable disposable = mConnection.readCharacteristic(characteristicUUID).subscribe(
                 characteristicValue -> {
                     service.onDataRecieved(characteristicUUID, characteristicValue);
@@ -149,7 +146,6 @@ public class BluetoothService {
         if(mConnection == null) {
             return;
         }
-
         Disposable disposable = mConnection.writeCharacteristic(characteristicUUID, buffer).subscribe(
                 characteristicValue -> {
                     Log.i(TAG, "Successfully wrote bytes to device.");

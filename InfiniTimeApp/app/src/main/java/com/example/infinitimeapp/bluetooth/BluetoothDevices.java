@@ -36,9 +36,7 @@ public class BluetoothDevices {
                 return;
             }
         }
-
         deviceList.add(device);
-
         ScanActivity.mAdapter.notifyDataSetChanged();
     }
 

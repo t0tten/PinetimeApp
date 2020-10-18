@@ -1,8 +1,5 @@
 package com.example.infinitimeapp.services;
 
-import com.example.infinitimeapp.bluetooth.BluetoothService;
-
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,11 +16,8 @@ public class MusicService extends BaseService {
     private static final char EVENT_MUSIC_PAUSE = 0x01;
     private static final char EVENT_MUSIC_NEXT = 0x03;
     private static final char EVENT_MUSIC_PREV = 0x04;
-    private static final char EVENT_MUSIC_VOLUP = 0x05;
-    private static final char EVENT_MUSIC_VOLDOWN = 0x06;
-
-    private static final char STATUS_MUSIC_PAUSED = 0x00;
-    private static final char STATUS_MUSIC_PLAYING = 0x01;
+    private static final char EVENT_MUSIC_VOLUME_UP = 0x05;
+    private static final char EVENT_MUSIC_VOLUME_DOWN = 0x06;
 
     private static MusicService sInstance = null;
 
@@ -63,8 +57,7 @@ public class MusicService extends BaseService {
     }
 
     private void eventHandler(byte[] message) {
-        char test = 'h';
-        switch(test) {
+        switch((char) message[0]) {
             case EVENT_MUSIC_OPEN:
                 break;
             case EVENT_MUSIC_PLAY:
@@ -75,37 +68,29 @@ public class MusicService extends BaseService {
                 break;
             case EVENT_MUSIC_PREV:
                 break;
-            case EVENT_MUSIC_VOLUP:
+            case EVENT_MUSIC_VOLUME_UP:
                 break;
-            case EVENT_MUSIC_VOLDOWN:
+            case EVENT_MUSIC_VOLUME_DOWN:
                 break;
         }
     }
 
     public void sendTrack(String track) {
-        send(getCharacteristicUUID(TRACK), track);
+        write(getCharacteristicUUID(TRACK), track.getBytes());
     }
 
     public void sendArtist(String artist) {
-        send(getCharacteristicUUID(ARTIST), artist);
+        write(getCharacteristicUUID(ARTIST), artist.getBytes());
     }
 
     public void sendAlbum(String album) {
-        send(getCharacteristicUUID(ALBUM), album);
+        write(getCharacteristicUUID(ALBUM), album.getBytes());
     }
 
     public void sendStatus(boolean isPlaying) {
-        send(getCharacteristicUUID(STATUS), isPlaying);
-    }
-
-    private void send(UUID characteristic, String message) {
-        BluetoothService.getInstance().write(characteristic, message.getBytes());
-    }
-
-    private void send(UUID characteristic, boolean isPlaying) {
-        byte[] test = new byte[2];
-        test[0] = (byte)(isPlaying ? 1 : 0);
-        test[1] = '\0';
-        BluetoothService.getInstance().write(characteristic, test);
+        byte[] message = new byte[2];
+        message[0] = (byte)(isPlaying ? 1 : 0);
+        message[1] = '\0';
+        write(getCharacteristicUUID(STATUS), message);
     }
 }

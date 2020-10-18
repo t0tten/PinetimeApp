@@ -58,27 +58,27 @@ public class DeviceInformationService extends BaseService {
     }
 
     public void getManufaturer() {
-        read(MANUFACTURER);
+        read(getCharacteristicUUID(MANUFACTURER));
     }
 
     public void getModel() {
-        read(MODEL);
+        read(getCharacteristicUUID(MODEL));
     }
 
     public void getSerial() {
-        read(SERIAL);
+        read(getCharacteristicUUID(SERIAL));
     }
 
     public void getFwRevisionId() {
-        read(FW_REVISION_ID);
+        read(getCharacteristicUUID(FW_REVISION_ID));
     }
 
     public void getHwRevisionId() {
-        read(HW_REVISION_ID);
+        read(getCharacteristicUUID(HW_REVISION_ID));
     }
 
     public void getSwRevisionId() {
-        read(SW_REVISION_ID);
+        read(getCharacteristicUUID(SW_REVISION_ID));
     }
 
     public static DeviceInformationService getInstance() {

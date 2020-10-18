@@ -28,12 +28,12 @@ public class BaseService implements PinetimeService {
 
     }
 
-    protected void read(String characteristicUUID) {
-        BluetoothService.getInstance().read(getCharacteristicUUID(characteristicUUID), this);
+    protected void read(UUID characteristicUUID) {
+        BluetoothService.getInstance().read(characteristicUUID, this);
     }
 
-    protected void write(String characteristicUUID) {
-
+    protected void write(UUID characteristicUUID, byte[] message) {
+        BluetoothService.getInstance().write(characteristicUUID, message);
     }
 
 }
