@@ -1,5 +1,7 @@
 package com.example.infinitimeapp.services;
 
+import com.example.infinitimeapp.common.SpotifyConnection;
+
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +20,8 @@ public class MusicService extends BaseService {
     private static final char EVENT_MUSIC_PREV = 0x04;
     private static final char EVENT_MUSIC_VOLUME_UP = 0x05;
     private static final char EVENT_MUSIC_VOLUME_DOWN = 0x06;
+
+    private SpotifyConnection mSpotifyConnection;
 
     private static MusicService sInstance = null;
 
@@ -57,21 +61,27 @@ public class MusicService extends BaseService {
     }
 
     private void eventHandler(byte[] message) {
-        switch((char) message[0]) {
-            case EVENT_MUSIC_OPEN:
-                break;
-            case EVENT_MUSIC_PLAY:
-                break;
-            case EVENT_MUSIC_PAUSE:
-                break;
-            case EVENT_MUSIC_NEXT:
-                break;
-            case EVENT_MUSIC_PREV:
-                break;
-            case EVENT_MUSIC_VOLUME_UP:
-                break;
-            case EVENT_MUSIC_VOLUME_DOWN:
-                break;
+        if(mSpotifyConnection != null) {
+            switch ((char) message[0]) {
+                case EVENT_MUSIC_PLAY:
+                    mSpotifyConnection.resume();
+                    break;
+                case EVENT_MUSIC_PAUSE:
+                    mSpotifyConnection.pause();
+                    break;
+                case EVENT_MUSIC_NEXT:
+                    mSpotifyConnection.nextTrack();
+                    break;
+                case EVENT_MUSIC_PREV:
+                    mSpotifyConnection.previousTrack();
+                    break;
+                case EVENT_MUSIC_VOLUME_UP:
+                    mSpotifyConnection.volumeUp();
+                    break;
+                case EVENT_MUSIC_VOLUME_DOWN:
+                    mSpotifyConnection.volumeDown();
+                    break;
+            }
         }
     }
 
@@ -81,6 +91,10 @@ public class MusicService extends BaseService {
 
     public void sendArtist(String artist) {
         write(getCharacteristicUUID(ARTIST), artist.getBytes());
+    }
+
+    public void useSpotifyConnection(SpotifyConnection spotifyConnection) {
+        mSpotifyConnection = spotifyConnection;
     }
 
     public void sendAlbum(String album) {

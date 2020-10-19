@@ -10,11 +10,11 @@ import java.util.List;
 
 public class NotificationService extends NotificationListenerService {
     public interface NotificationListener {
-        void sendMessageToWatch(String message) ;
+        void sendMessageToWatch(String message);
     }
 
-    Context context ;
-    static NotificationListener mNotificationListener ;
+    Context context;
+    static NotificationListener mNotificationListener;
     // Should ask user what kind of notifications they want to receive
     ArrayList<String> packageFilter = new ArrayList<>(List.of("com.google.android.apps.messaging",
                                                               "com.snapchat.android",

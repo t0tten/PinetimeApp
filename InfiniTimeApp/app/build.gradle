@@ -38,4 +38,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     implementation "com.polidea.rxandroidble2:rxandroidble:1.11.1"
+
+    implementation project(':spotify-app-remote-release-0.7.1')
+    implementation "com.google.code.gson:gson:2.8.5"
 }

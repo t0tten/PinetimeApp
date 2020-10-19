@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.infinitimeapp">
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -31,9 +30,13 @@
                     android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+        <receiver android:name=".common.BroadcastReceiver">
+            <intent-filter>
+                <action android:name="newTrackInformation" />
+            </intent-filter>
+        </receiver>
     </application>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
-
 </manifest>

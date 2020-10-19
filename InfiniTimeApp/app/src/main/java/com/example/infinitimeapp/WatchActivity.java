@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
 import com.example.infinitimeapp.common.NotificationService;
+import com.example.infinitimeapp.common.BroadcastReceiver;
+import com.example.infinitimeapp.common.SpotifyConnection;
 import com.example.infinitimeapp.database.Database;
 import com.example.infinitimeapp.services.AlertNotificationService;
 import com.example.infinitimeapp.services.DeviceInformationService;
@@ -28,7 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import static com.example.infinitimeapp.common.Constants.DELAY_IN_MILLIS;
 import static com.example.infinitimeapp.common.Constants.TAG;
 
-public class WatchActivity extends AppCompatActivity implements NotificationService.NotificationListener {
+public class WatchActivity extends AppCompatActivity implements NotificationService.NotificationListener, BroadcastReceiver.ReceiverListener {
     TextView manufacturer;
     TextView model;
     TextView serial;
@@ -51,6 +53,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
     Handler handler = new Handler();
     Database database = new Database(this);
+    SpotifyConnection mSpotifyConnection;
 
     static boolean connectionState = true;
     static final int REQUEST_ENABLE_BT = 1;
@@ -72,6 +75,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         checkNotificationPermissions();
 
         new NotificationService().setListener(this);
+        new BroadcastReceiver().setListener(this);
 
         getViewObjects();
         applyButtonClickListers();
@@ -215,6 +219,14 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         } else {
             enableDisableUI(true);
         }
+        /*mSpotifyConnection = new SpotifyConnection(this);
+        MusicService.getInstance().useSpotifyConnection(mSpotifyConnection);*/
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        //mSpotifyConnection.teardown();
     }
 
     @Override
@@ -234,6 +246,17 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
             startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onNotifyReceive(String action) {
+        if(action.equals("newTackInformation")) {
+            Log.e(TAG, "onNotifyReceive - Action: " + action);
+            /*SpotifyConnection.TrackInformation trackInformation = mSpotifyConnection.getTrackInformation();
+            MusicService.getInstance().sendArtist(trackInformation.getArtist());
+            MusicService.getInstance().sendTrack(trackInformation.getTrack());
+            MusicService.getInstance().sendAlbum(trackInformation.getAlbum());*/
         }
     }
 }

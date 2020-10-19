@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.ViewHolder> implements View.OnClickListener {
-    private Context context;
+    private final Context context;
     BluetoothDevices devices;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
