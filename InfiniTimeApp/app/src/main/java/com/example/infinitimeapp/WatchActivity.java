@@ -69,7 +69,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-        checkPermissionsOrAsk();
+        checkNotificationPermissions();
 
         new NotificationService().setListener(this);
 
@@ -222,10 +222,16 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         //AlertNotificationService.getInstance().sendMessage(message);
     }
 
-    private void checkPermissionsOrAsk() {
+    private void checkNotificationPermissions() {
         // Check permission for notification access
         String enabledNotificationListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
         if (enabledNotificationListeners == null || !enabledNotificationListeners.contains(getPackageName())) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Need permission")
+                    .setMessage("If you want to send notifications to device we need notification access.")
+                    .setNeutralButton("OK", null)
+                    .show();
+
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
             startActivity(intent);
         }
