@@ -46,7 +46,7 @@ public class SpotifyConnection {
     public SpotifyConnection(Context context) {
         mContext = context;
         isConnected = false;
-        /*ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
+        ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
                 .showAuthView(true)
                 .build();
@@ -57,17 +57,14 @@ public class SpotifyConnection {
                     public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                         mSpotifyAppRemote = spotifyAppRemote;
                         Log.d(TAG, "Connected! Yay!");
-
-                        // Now you can start interacting with App Remote
                         isConnected = true;
                     }
 
                     @Override
                     public void onFailure(Throwable throwable) {
                         Log.e(TAG, throwable.getMessage(), throwable);
-                        // Something went wrong when attempting to connect! Handle errors here
                     }
-                });*/
+                });
     }
 
     public void resume() {
