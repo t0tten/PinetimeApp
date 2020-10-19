@@ -15,7 +15,7 @@ public class BluetoothDevices {
         }
     }
 
-    private static BluetoothDevices instance = new BluetoothDevices();
+    private static final BluetoothDevices instance = new BluetoothDevices();
     private final ArrayList<BTDeviceModel> deviceList;
 
     private BluetoothDevices() {
@@ -24,10 +24,6 @@ public class BluetoothDevices {
 
     public static BluetoothDevices getInstance() {
         return instance;
-    }
-
-    public ArrayList<BTDeviceModel> getDevices(){
-        return this.deviceList;
     }
 
     public void addDevice(BTDeviceModel device) {

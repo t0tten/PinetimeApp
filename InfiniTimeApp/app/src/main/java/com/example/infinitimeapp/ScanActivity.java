@@ -16,10 +16,9 @@ import com.example.infinitimeapp.bluetooth.BluetoothService;
 import static com.example.infinitimeapp.common.Constants.DELAY_IN_MILLIS;
 
 public class ScanActivity extends AppCompatActivity {
-    private boolean isStarted = false;
     public static RecyclerView recyclerView;
     public static RecycleViewAdapter mAdapter;
-    BluetoothService mBluetoothService = BluetoothService.getInstance();
+    BluetoothService mBluetoothService;
     Handler handler = new Handler();
 
     @Override
@@ -27,16 +26,17 @@ public class ScanActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
 
+        mBluetoothService = BluetoothService.getInstance();
         mBluetoothService.init(this);
+        recyclerView = findViewById(R.id.devicesList);
+        Button scanButton = findViewById(R.id.scanButton);
 
-        final Button button = findViewById(R.id.scanButton);
-        button.setOnClickListener(v -> {
-            Toast.makeText(ScanActivity.this, "Looking for Pinetime watches nearby", Toast.LENGTH_LONG).show();
+        scanButton.setOnClickListener(v -> {
+            Toast.makeText(ScanActivity.this, "Looking for nearby Pinetime devices", Toast.LENGTH_LONG).show();
             mBluetoothService.scan();
             BluetoothDevices.getInstance().clear();
         });
 
-        recyclerView = (RecyclerView) findViewById(R.id.devicesList);
         mAdapter = new RecycleViewAdapter(this);
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
