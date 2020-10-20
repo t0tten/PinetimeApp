@@ -63,7 +63,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "onCreate()");
+        Log.d(TAG, "onCreate()");
         setContentView(R.layout.activity_watch);
 
         final BluetoothManager bluetoothManager =
@@ -200,7 +200,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     @Override
     protected void onStart() {
         super.onStart();
-        Log.i(TAG, "UpdateUI");
+        Log.d(TAG, "UpdateUI");
         if(mBluetoothService == null) {
             MAC_Address = database.readMACFromDatabase();
             if(MAC_Address.isEmpty()) {
@@ -246,7 +246,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     @Override
     public void onBroadcastReceive(String action) {
         if(action.equals("newTackInformation")) {
-            Log.e(TAG, "onNotifyReceive - Action: " + action);
+            Log.d(TAG, "onNotifyReceive - Action: " + action);
             /*SpotifyConnection.TrackInformation trackInformation = mSpotifyConnection.getTrackInformation();
             MusicService.getInstance().sendArtist(trackInformation.getArtist());
             MusicService.getInstance().sendTrack(trackInformation.getTrack());

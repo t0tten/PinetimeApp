@@ -13,7 +13,7 @@ public class BroadcastReceiver extends android.content.BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e(Constants.TAG, "ACTION: " + intent.getAction());
+        Log.d(Constants.TAG, "ACTION: " + intent.getAction());
         mReceiverListener.onBroadcastReceive(intent.getAction());
     }
 

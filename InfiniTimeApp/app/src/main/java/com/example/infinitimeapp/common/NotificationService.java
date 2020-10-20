@@ -29,7 +29,7 @@ public class NotificationService extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        Log.i(Constants.TAG, "ID :" + sbn.getId() + " \t " + sbn.getNotification().tickerText + " \t " + sbn.getPackageName()) ;
+        Log.d(Constants.TAG, "ID :" + sbn.getId() + " \t " + sbn.getNotification().tickerText + " \t " + sbn.getPackageName()) ;
         if(packageFilter.contains(sbn.getPackageName()) && sbn.getNotification().tickerText != null) {
             mNotificationListener.sendNotificationToWatch(sbn.getNotification().tickerText.toString());
         }

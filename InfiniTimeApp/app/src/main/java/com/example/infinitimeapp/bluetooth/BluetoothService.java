@@ -39,7 +39,7 @@ public class BluetoothService {
             Log.e(TAG, "Error already scanning for bluetooth devices.");
             return;
         }
-        Log.i(TAG, "Started scanning for bluetooth devices.");
+        Log.d(TAG, "Started scanning for bluetooth devices.");
         mScanSubscription = mRxBleClient.scanBleDevices(
                 new ScanSettings.Builder().build()
         )
@@ -47,14 +47,14 @@ public class BluetoothService {
                         scanResult -> {
                             RxBleDevice device = scanResult.getBleDevice();
                             if(device.getName() != null && device.getName().contains("InfiniTime")) {
-                                Log.i(TAG, "Found " + device.getMacAddress());
+                                Log.d(TAG, "Found " + device.getMacAddress());
 
                                 BluetoothDevices.BTDeviceModel d = new BluetoothDevices.BTDeviceModel(device.getMacAddress(), device.getName());
                                 BluetoothDevices.getInstance().addDevice(d);
                             }
                         },
                         throwable -> {
-                            Log.i(TAG, throwable.toString());
+                            Log.d(TAG, throwable.toString());
                         }
                 );
     }
@@ -63,7 +63,7 @@ public class BluetoothService {
         if(mScanSubscription != null) {
             mScanSubscription.dispose();
             mScanSubscription = null;
-            Log.i(TAG, "Finished scanning for bluetooth devices.");
+            Log.d(TAG, "Finished scanning for bluetooth devices.");
         }
     }
 
@@ -75,7 +75,7 @@ public class BluetoothService {
          mConnectedDevice.observeConnectionStateChanges()
                 .subscribe(
                         connectionState -> {
-                            Log.i(TAG, connectionState.toString());
+                            Log.d(TAG, connectionState.toString());
                         },
                         throwable -> {
                             Log.e(TAG, "Error reading connection state: " + throwable);
@@ -105,7 +105,7 @@ public class BluetoothService {
         if(mConnectionDisposable != null) {
             mConnectionDisposable.dispose();
             mConnectionDisposable = null;
-            Log.i(TAG, "Teardown connection.");
+            Log.d(TAG, "Teardown connection.");
         }
     }
 
@@ -135,10 +135,11 @@ public class BluetoothService {
         }
         Disposable disposable = mConnection.writeCharacteristic(characteristicUUID, buffer).subscribe(
                 characteristicValue -> {
-                    Log.i(TAG, "Successfully wrote bytes to device.");
+                    Log.d(TAG, "Successfully wrote bytes to device.");
                 },
-                throwable -> {
-                    Log.e(TAG, throwable.toString());
+                e -> {
+                    Log.e(TAG, e.toString());
+                    e.printStackTrace();
                 }
         );
     }
