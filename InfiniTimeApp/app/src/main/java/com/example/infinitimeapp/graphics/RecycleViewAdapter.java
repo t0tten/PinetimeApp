@@ -1,4 +1,4 @@
-package com.example.infinitimeapp.adapters;
+package com.example.infinitimeapp.graphics;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -17,9 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.ViewHolder> implements View.OnClickListener {
-    private final Context context;
-    BluetoothDevices devices;
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView alias, mac;
         ImageView image;
@@ -32,15 +29,20 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
         }
     }
 
-    public RecycleViewAdapter(Context ct) {
-        context = ct;
-        devices = BluetoothDevices.getInstance();
+    private final Context mContext;
+    private final BluetoothDevices mDevices;
+    private final BluetoothService mBluetoothService;
+
+    public RecycleViewAdapter(Context context, BluetoothService bluetoothService) {
+        mContext = context;
+        mBluetoothService = bluetoothService;
+        mDevices = BluetoothDevices.getInstance();
     }
 
     @NonNull
     @Override
     public RecycleViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(context);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         View view = inflater.inflate(R.layout.recycler_view_row, parent, false);
         view.setOnClickListener(this);
         return new ViewHolder(view);
@@ -48,7 +50,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        BluetoothDevices.BTDeviceModel device = devices.getDeviceFromIndex(position);
+        BluetoothDevices.BTDeviceModel device = mDevices.getDeviceFromIndex(position);
 
         holder.alias.setText(device.name);
         holder.mac.setText(device.mac);
@@ -57,14 +59,14 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
     @Override
     public int getItemCount() {
-        return devices.getSize();
+        return mDevices.getSize();
     }
 
     @Override
     public void onClick(View v) {
         int index = ScanActivity.recyclerView.getChildLayoutPosition(v);
-        BluetoothDevices.BTDeviceModel device = devices.getDeviceFromIndex(index);
-        Toast.makeText(context, "Trying to connect to watch", Toast.LENGTH_LONG).show();
-        BluetoothService.getInstance().connect(device.mac);
+        BluetoothDevices.BTDeviceModel device = mDevices.getDeviceFromIndex(index);
+        Toast.makeText(mContext, "Trying to connect to watch", Toast.LENGTH_LONG).show();
+        mBluetoothService.connect(device.mac);
     }
 }

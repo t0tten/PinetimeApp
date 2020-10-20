@@ -32,7 +32,8 @@
         </service>
         <receiver android:name=".common.BroadcastReceiver">
             <intent-filter>
-                <action android:name="newTrackInformation" />
+                <action android:name="com.example.infinitime.newTrackInformation" />
+                <action android:name="com.example.infinitime.update" />
             </intent-filter>
         </receiver>
     </application>

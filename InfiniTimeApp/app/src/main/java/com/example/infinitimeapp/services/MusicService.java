@@ -1,5 +1,6 @@
 package com.example.infinitimeapp.services;
 
+import com.example.infinitimeapp.bluetooth.BluetoothService;
 import com.example.infinitimeapp.common.SpotifyConnection;
 
 import java.util.UUID;
@@ -85,26 +86,26 @@ public class MusicService extends BaseService {
         }
     }
 
-    public void sendTrack(String track) {
-        write(getCharacteristicUUID(TRACK), track.getBytes());
+    public void sendTrack(BluetoothService bluetoothService, String track) {
+        write(bluetoothService, getCharacteristicUUID(TRACK), track.getBytes());
     }
 
-    public void sendArtist(String artist) {
-        write(getCharacteristicUUID(ARTIST), artist.getBytes());
+    public void sendArtist(BluetoothService bluetoothService, String artist) {
+        write(bluetoothService, getCharacteristicUUID(ARTIST), artist.getBytes());
     }
 
     public void useSpotifyConnection(SpotifyConnection spotifyConnection) {
         mSpotifyConnection = spotifyConnection;
     }
 
-    public void sendAlbum(String album) {
-        write(getCharacteristicUUID(ALBUM), album.getBytes());
+    public void sendAlbum(BluetoothService bluetoothService, String album) {
+        write(bluetoothService, getCharacteristicUUID(ALBUM), album.getBytes());
     }
 
-    public void sendStatus(boolean isPlaying) {
+    public void sendStatus(BluetoothService bluetoothService, boolean isPlaying) {
         byte[] message = new byte[2];
         message[0] = (byte)(isPlaying ? 1 : 0);
         message[1] = '\0';
-        write(getCharacteristicUUID(STATUS), message);
+        write(bluetoothService, getCharacteristicUUID(STATUS), message);
     }
 }

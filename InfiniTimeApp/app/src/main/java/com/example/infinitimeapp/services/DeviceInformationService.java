@@ -1,5 +1,8 @@
 package com.example.infinitimeapp.services;
 
+import com.example.infinitimeapp.bluetooth.BluetoothService;
+import com.example.infinitimeapp.graphics.StatusChanged;
+
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,30 +58,38 @@ public class DeviceInformationService extends BaseService {
                 break;
             default:
         }
+        if(!mManufacturer.isEmpty() &&
+            !mModel.isEmpty() &&
+            !mSerial.isEmpty() &&
+            !mFw_revision.isEmpty() &&
+            !mHw_revision.isEmpty() &&
+            !mSw_revision.isEmpty()) {
+            StatusChanged.getInstance().getListener().updateUI();
+        }
     }
 
-    public void getManufaturer() {
-        read(getCharacteristicUUID(MANUFACTURER));
+    public void getManufaturer(BluetoothService bluetoothService) {
+        read(bluetoothService, getCharacteristicUUID(MANUFACTURER));
     }
 
-    public void getModel() {
-        read(getCharacteristicUUID(MODEL));
+    public void getModel(BluetoothService bluetoothService) {
+        read(bluetoothService, getCharacteristicUUID(MODEL));
     }
 
-    public void getSerial() {
-        read(getCharacteristicUUID(SERIAL));
+    public void getSerial(BluetoothService bluetoothService) {
+        read(bluetoothService, getCharacteristicUUID(SERIAL));
     }
 
-    public void getFwRevisionId() {
-        read(getCharacteristicUUID(FW_REVISION_ID));
+    public void getFwRevisionId(BluetoothService bluetoothService) {
+        read(bluetoothService, getCharacteristicUUID(FW_REVISION_ID));
     }
 
-    public void getHwRevisionId() {
-        read(getCharacteristicUUID(HW_REVISION_ID));
+    public void getHwRevisionId(BluetoothService bluetoothService) {
+        read(bluetoothService, getCharacteristicUUID(HW_REVISION_ID));
     }
 
-    public void getSwRevisionId() {
-        read(getCharacteristicUUID(SW_REVISION_ID));
+    public void getSwRevisionId(BluetoothService bluetoothService) {
+        read(bluetoothService, getCharacteristicUUID(SW_REVISION_ID));
     }
 
     public static DeviceInformationService getInstance() {

@@ -4,9 +4,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.infinitimeapp.database.Database;
-import com.example.infinitimeapp.ScanActivity;
 import com.example.infinitimeapp.WatchActivity;
-import com.example.infinitimeapp.common.Utils;
+import com.example.infinitimeapp.graphics.StatusChanged;
 import com.example.infinitimeapp.services.PinetimeService;
 import com.polidea.rxandroidble2.RxBleClient;
 import com.polidea.rxandroidble2.RxBleConnection;
@@ -20,31 +19,18 @@ import io.reactivex.disposables.Disposable;
 import static com.example.infinitimeapp.common.Constants.TAG;
 
 public class BluetoothService {
+    private final RxBleClient mRxBleClient;
+    private final Database mDatabase;
 
-    private static BluetoothService instance = null;
+    private Disposable mScanSubscription;
+    private Disposable mConnectionDisposable;
+    private RxBleConnection mConnection;
+    private boolean isConnected;
 
-    RxBleClient mRxBleClient;
-    Context mContext;
-    Disposable mScanSubscription = null;
-    Disposable mConnectionDisposable = null;
-    RxBleDevice mConnectedDevice = null;
-    RxBleConnection mConnection = null;
-    boolean isConnected;
-
-    private BluetoothService() {
-        isConnected = false;
-    }
-
-    public static BluetoothService getInstance()
-    {
-        if (instance == null)
-            instance = new BluetoothService();
-        return instance;
-    }
-
-    public void init(Context context) {
-        mContext = context;
+    public BluetoothService(Context context) {
         mRxBleClient = RxBleClient.create(context);
+        mDatabase = new Database(context);
+        isConnected = false;
     }
 
     public void scan() {
@@ -65,7 +51,6 @@ public class BluetoothService {
 
                                 BluetoothDevices.BTDeviceModel d = new BluetoothDevices.BTDeviceModel(device.getMacAddress(), device.getName());
                                 BluetoothDevices.getInstance().addDevice(d);
-                                ScanActivity.mAdapter.notifyDataSetChanged();
                             }
                         },
                         throwable -> {
@@ -85,7 +70,7 @@ public class BluetoothService {
     public void connect(String macAddresss) {
         stopScanning();
 
-        mConnectedDevice = mRxBleClient.getBleDevice(macAddresss);
+        RxBleDevice mConnectedDevice = mRxBleClient.getBleDevice(macAddresss);
 
          mConnectedDevice.observeConnectionStateChanges()
                 .subscribe(
@@ -100,17 +85,18 @@ public class BluetoothService {
         mConnectionDisposable = mConnectedDevice.establishConnection(true)
                 .subscribe(
                         rxBleConnection -> {
-                            Log.i(TAG, "Connected to " + macAddresss);
                             mConnection = rxBleConnection;
                             isConnected = true;
+
                             if(WatchActivity.MAC_Address.isEmpty()) {
-                                Database database = new Database(mContext);
-                                database.saveMACToDatabase(macAddresss);
+                                mDatabase.saveMACToDatabase(macAddresss);
                             }
-                            Utils.init();
+
+                            StatusChanged.getInstance().getListener().onConnectionChanged(isConnected, this);
                         },
-                        throwable -> {
-                            Log.e(TAG, "Error connecting: " + throwable);
+                        e -> {
+                            Log.e(TAG, "Error connecting: " + e);
+                            e.printStackTrace();
                         }
                 );
     }
@@ -127,6 +113,7 @@ public class BluetoothService {
         isConnected = false;
         stopScanning();
         stopConnection();
+        StatusChanged.getInstance().getListener().onConnectionChanged(isConnected, this);
     }
 
     public void read(UUID characteristicUUID, PinetimeService service) {

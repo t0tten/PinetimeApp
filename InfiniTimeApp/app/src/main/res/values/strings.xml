@@ -9,9 +9,9 @@
     <string name="manufacturer">Manufacturer: </string>
     <string name="model">Model Number: </string>
     <string name="serial">Serial Number: </string>
-    <string name="fw_revision">FW REVISION: </string>
-    <string name="hw_revision">HW REVISION: </string>
-    <string name="sw_revision">SW REVISION: </string>
+    <string name="fw_revision">FW Revision: </string>
+    <string name="hw_revision">HW Revision: </string>
+    <string name="sw_revision">SW Revision: </string>
 
     <string name="send_alert">Alert:</string>
     <string name="send_button">Send</string>

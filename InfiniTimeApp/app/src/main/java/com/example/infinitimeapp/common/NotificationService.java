@@ -10,12 +10,13 @@ import java.util.List;
 
 public class NotificationService extends NotificationListenerService {
     public interface NotificationListener {
-        void sendMessageToWatch(String message);
+        void sendNotificationToWatch(String message);
     }
 
     Context context;
     static NotificationListener mNotificationListener;
-    // Should ask user what kind of notifications they want to receive
+
+    // TODO: Should ask user what kind of notifications they want to receive
     ArrayList<String> packageFilter = new ArrayList<>(List.of("com.google.android.apps.messaging",
                                                               "com.snapchat.android",
                                                               "com.facebook.orca"));
@@ -30,7 +31,7 @@ public class NotificationService extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         Log.i(Constants.TAG, "ID :" + sbn.getId() + " \t " + sbn.getNotification().tickerText + " \t " + sbn.getPackageName()) ;
         if(packageFilter.contains(sbn.getPackageName()) && sbn.getNotification().tickerText != null) {
-            mNotificationListener.sendMessageToWatch(sbn.getNotification().tickerText.toString());
+            mNotificationListener.sendNotificationToWatch(sbn.getNotification().tickerText.toString());
         }
     }
 

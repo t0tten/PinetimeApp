@@ -1,6 +1,6 @@
 package com.example.infinitimeapp.bluetooth;
 
-import com.example.infinitimeapp.ScanActivity;
+import com.example.infinitimeapp.graphics.StatusChanged;
 
 import java.util.ArrayList;
 
@@ -33,7 +33,7 @@ public class BluetoothDevices {
             }
         }
         deviceList.add(device);
-        ScanActivity.mAdapter.notifyDataSetChanged();
+        StatusChanged.getInstance().getListener().updateUI();
     }
 
     public BTDeviceModel getDeviceFromIndex(int index) {
@@ -46,6 +46,5 @@ public class BluetoothDevices {
 
     public void clear() {
         deviceList.clear();
-        ScanActivity.mAdapter.notifyDataSetChanged();
     }
 }

@@ -10,22 +10,21 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.example.infinitimeapp.adapters.RecycleViewAdapter;
+import com.example.infinitimeapp.graphics.RecycleViewAdapter;
 import com.example.infinitimeapp.bluetooth.BluetoothDevices;
 import com.example.infinitimeapp.bluetooth.BluetoothService;
+import com.example.infinitimeapp.graphics.StatusChanged;
 
-import static com.example.infinitimeapp.common.Constants.DELAY_IN_MILLIS;
-
-public class ScanActivity extends AppCompatActivity {
+public class ScanActivity extends AppCompatActivity implements StatusChanged.StatusChangedListener {
     public final int PERMISSIONS_REQUEST_LOCATION = 99;
     public static RecyclerView recyclerView;
-    public static RecycleViewAdapter mAdapter;
-    BluetoothService mBluetoothService;
-    Handler handler = new Handler();
+
+    private RecycleViewAdapter mAdapter;
+    private BluetoothService mBluetoothService;
+    private StatusChanged.StatusChangedListener oldListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +33,10 @@ public class ScanActivity extends AppCompatActivity {
 
         checkLocationAccess();
 
-        mBluetoothService = BluetoothService.getInstance();
-        mBluetoothService.init(this);
+        oldListener = StatusChanged.getInstance().getListener();
+        StatusChanged.getInstance().setListener(this);
+        mBluetoothService = new BluetoothService(this);
+
         recyclerView = findViewById(R.id.devicesList);
         Button scanButton = findViewById(R.id.scanButton);
 
@@ -43,22 +44,13 @@ public class ScanActivity extends AppCompatActivity {
             Toast.makeText(ScanActivity.this, "Looking for nearby Pinetime devices", Toast.LENGTH_LONG).show();
             mBluetoothService.scan();
             BluetoothDevices.getInstance().clear();
+            mAdapter.notifyDataSetChanged();
         });
 
-        mAdapter = new RecycleViewAdapter(this);
+        mAdapter = new RecycleViewAdapter(this, mBluetoothService);
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setClickable(true);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if(BluetoothService.getInstance().isConnected()) {
-                    finish();
-                }
-                handler.postDelayed(this, DELAY_IN_MILLIS);
-            }
-        }, DELAY_IN_MILLIS);
     }
 
     private void checkLocationAccess() {
@@ -76,5 +68,19 @@ public class ScanActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_LOCATION);
         }
+    }
+
+    @Override
+    public void onConnectionChanged(boolean isConnected, BluetoothService bluetoothService) {
+        if(isConnected) {
+            StatusChanged.getInstance().setListener(oldListener);
+            StatusChanged.getInstance().getListener().onConnectionChanged(isConnected, bluetoothService);
+            finish();
+        }
+    }
+
+    @Override
+    public void updateUI() {
+        mAdapter.notifyDataSetChanged();
     }
 }

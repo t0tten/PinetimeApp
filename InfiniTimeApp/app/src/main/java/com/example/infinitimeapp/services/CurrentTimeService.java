@@ -1,5 +1,7 @@
 package com.example.infinitimeapp.services;
 
+import com.example.infinitimeapp.bluetooth.BluetoothService;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Calendar;
@@ -54,7 +56,7 @@ public class CurrentTimeService extends BaseService {
                 .array();
     }
 
-    public void updateTime() {
-        write(getCharacteristicUUID(CURRENT_TIME), getCTSAsBytes());
+    public void updateTime(BluetoothService bluetoothService) {
+        write(bluetoothService, getCharacteristicUUID(CURRENT_TIME), getCTSAsBytes());
     }
 }

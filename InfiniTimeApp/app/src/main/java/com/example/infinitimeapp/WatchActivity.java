@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
@@ -19,7 +18,9 @@ import com.example.infinitimeapp.bluetooth.BluetoothService;
 import com.example.infinitimeapp.common.NotificationService;
 import com.example.infinitimeapp.common.BroadcastReceiver;
 import com.example.infinitimeapp.common.SpotifyConnection;
+import com.example.infinitimeapp.common.Utils;
 import com.example.infinitimeapp.database.Database;
+import com.example.infinitimeapp.graphics.StatusChanged;
 import com.example.infinitimeapp.services.AlertNotificationService;
 import com.example.infinitimeapp.services.DeviceInformationService;
 import com.example.infinitimeapp.services.MusicService;
@@ -27,10 +28,11 @@ import com.example.infinitimeapp.services.MusicService;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import static com.example.infinitimeapp.common.Constants.DELAY_IN_MILLIS;
 import static com.example.infinitimeapp.common.Constants.TAG;
 
-public class WatchActivity extends AppCompatActivity implements NotificationService.NotificationListener, BroadcastReceiver.ReceiverListener {
+public class WatchActivity extends AppCompatActivity implements NotificationService.NotificationListener,
+                                                                BroadcastReceiver.ReceiverListener,
+                                                                StatusChanged.StatusChangedListener {
     TextView manufacturer;
     TextView model;
     TextView serial;
@@ -51,17 +53,17 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     DeviceInformationService deviceInformationService = DeviceInformationService.getInstance();
     AlertNotificationService alertNotificationService = AlertNotificationService.getInstance();
 
-    Handler handler = new Handler();
     Database database = new Database(this);
     SpotifyConnection mSpotifyConnection;
+    BluetoothService mBluetoothService;
 
-    static boolean connectionState = true;
     static final int REQUEST_ENABLE_BT = 1;
     public static String MAC_Address = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate()");
         setContentView(R.layout.activity_watch);
 
         final BluetoothManager bluetoothManager =
@@ -76,25 +78,16 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
         new NotificationService().setListener(this);
         new BroadcastReceiver().setListener(this);
+        StatusChanged.getInstance().setListener(this);
 
         getViewObjects();
         applyButtonClickListers();
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                updateDeviceInformation();
-                handler.postDelayed(this, DELAY_IN_MILLIS);
-            }
-        }, DELAY_IN_MILLIS);
     }
 
     private void applyButtonClickListers() {
         disconnectButton.setOnClickListener(v -> {
-            BluetoothService.getInstance().teardown();
+            mBluetoothService.teardown();
             showToast("Disconnecting from watch");
-            connectionState = false;
-            enableDisableUI(false);
             database.removeMacFromDatabase();
         });
 
@@ -107,7 +100,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
             }
             showToast("Sending alert: " + message);
             alertMessage.setText("");
-            alertNotificationService.sendMessage(message);
+            alertNotificationService.sendMessage(mBluetoothService, message);
         });
 
         sendMusicInfo.setOnClickListener(v -> {
@@ -118,20 +111,20 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
             if(!track.isEmpty()) {
                 musicTrack.setText("");
-                MusicService.getInstance().sendTrack(track);
+                MusicService.getInstance().sendTrack(mBluetoothService, track);
             }
 
             if(!artist.isEmpty()) {
                 musicArtist.setText("");
-                MusicService.getInstance().sendArtist(artist);
+                MusicService.getInstance().sendArtist(mBluetoothService, artist);
             }
 
             if(!album.isEmpty()) {
                 musicAlbum.setText("");
-                MusicService.getInstance().sendAlbum(album);
+                MusicService.getInstance().sendAlbum(mBluetoothService, album);
             }
 
-            MusicService.getInstance().sendStatus(isPlaying);
+            MusicService.getInstance().sendStatus(mBluetoothService, isPlaying);
             showToast("Sending music information");
         });
     }
@@ -156,12 +149,14 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     }
 
     public void updateDeviceInformation() {
-        manufacturer.setText("Manufacturer: " + deviceInformationService.mManufacturer);
-        model.setText("Model Number: " + deviceInformationService.mModel);
-        serial.setText("Serial Number: " + deviceInformationService.mSerial);
-        fw_revision.setText("FW Revision : " + deviceInformationService.mFw_revision);
-        hw_revision.setText("HW Revision: " + deviceInformationService.mHw_revision);
-        sw_revision.setText("SW Revision: " + deviceInformationService.mSw_revision);
+        runOnUiThread(() -> {
+            manufacturer.setText(String.format("%s %s", getString(R.string.manufacturer), deviceInformationService.mManufacturer));
+            model.setText(String.format("%s %s", getString(R.string.model), deviceInformationService.mModel));
+            serial.setText(String.format("%s %s", getString(R.string.serial), deviceInformationService.mSerial));
+            fw_revision.setText(String.format("%s %s", getString(R.string.fw_revision), deviceInformationService.mFw_revision));
+            hw_revision.setText(String.format("%s %s", getString(R.string.hw_revision), deviceInformationService.mHw_revision));
+            sw_revision.setText(String.format("%s %s", getString(R.string.sw_revision), deviceInformationService.mSw_revision));
+        });
     }
 
     private void showEmptyErrorAlert() {
@@ -196,29 +191,28 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
     @Override
     public void onDestroy() {
-        BluetoothService.getInstance().teardown();
+        if(mBluetoothService.isConnected()) {
+            mBluetoothService.teardown();
+        }
         super.onDestroy();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if(!BluetoothService.getInstance().isConnected()) {
-            enableDisableUI(false);
-
+        Log.i(TAG, "UpdateUI");
+        if(mBluetoothService == null) {
             MAC_Address = database.readMACFromDatabase();
             if(MAC_Address.isEmpty()) {
                 Intent intent = new Intent(getApplicationContext(), ScanActivity.class);
                 startActivity(intent);
             } else {
                 showToast("Attempting to connect to:\n" + MAC_Address);
-                BluetoothService.getInstance().init(this);
-                BluetoothService.getInstance().connect(MAC_Address);
-                enableDisableUI(true);
+                mBluetoothService = new BluetoothService(this);
+                mBluetoothService.connect(MAC_Address);
             }
-        } else {
-            enableDisableUI(true);
         }
+
         /*mSpotifyConnection = new SpotifyConnection(this);
         MusicService.getInstance().useSpotifyConnection(mSpotifyConnection);*/
     }
@@ -230,7 +224,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     }
 
     @Override
-    public void sendMessageToWatch(String message) {
+    public void sendNotificationToWatch(String message) {
         //AlertNotificationService.getInstance().sendMessage(message);
     }
 
@@ -250,7 +244,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     }
 
     @Override
-    public void onNotifyReceive(String action) {
+    public void onBroadcastReceive(String action) {
         if(action.equals("newTackInformation")) {
             Log.e(TAG, "onNotifyReceive - Action: " + action);
             /*SpotifyConnection.TrackInformation trackInformation = mSpotifyConnection.getTrackInformation();
@@ -258,5 +252,21 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
             MusicService.getInstance().sendTrack(trackInformation.getTrack());
             MusicService.getInstance().sendAlbum(trackInformation.getAlbum());*/
         }
+    }
+
+    @Override
+    public void onConnectionChanged(boolean isConnected, BluetoothService bluetoothService) {
+        if(isConnected) {
+            mBluetoothService = bluetoothService;
+            enableDisableUI(true);
+            Utils.init(mBluetoothService);
+        } else {
+            enableDisableUI(false);
+        }
+    }
+
+    @Override
+    public void updateUI() {
+        updateDeviceInformation();
     }
 }
