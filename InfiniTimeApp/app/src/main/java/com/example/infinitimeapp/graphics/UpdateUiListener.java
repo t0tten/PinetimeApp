@@ -2,26 +2,27 @@ package com.example.infinitimeapp.graphics;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
 
-public class StatusChanged {
+public class UpdateUiListener {
     public interface StatusChangedListener {
         void onConnectionChanged(boolean isConnected, BluetoothService bluetoothService);
-        void updateUI();
+        void onUpdateUI();
     }
 
+    public static UpdateUiListener sInstance;
     static StatusChangedListener mStatusChangesListener;
-    public static StatusChanged sInstance = new StatusChanged();
 
-    private StatusChanged() {}
+    private UpdateUiListener() {}
 
     public void setListener(StatusChangedListener statusChangedListener) {
-        StatusChanged.mStatusChangesListener = statusChangedListener;
+        UpdateUiListener.mStatusChangesListener = statusChangedListener;
     }
 
     public StatusChangedListener getListener() {
         return mStatusChangesListener;
     }
 
-    public static StatusChanged getInstance() {
+    public static UpdateUiListener getInstance() {
+        if (sInstance == null) sInstance = new UpdateUiListener();
         return sInstance;
     }
 }

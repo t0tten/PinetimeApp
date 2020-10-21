@@ -1,4 +1,4 @@
-package com.example.infinitimeapp.database;
+package com.example.infinitimeapp.utils;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,15 +7,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-public class Database extends SQLiteOpenHelper {
+import static com.example.infinitimeapp.common.Constants.DATABASE_NAME;
+import static com.example.infinitimeapp.common.Constants.DATABASE_VERSION;
+
+public class DatabaseConnection extends SQLiteOpenHelper {
     private final String TABLE_NAME = "watch";
     private final String COLUMN_NAME_1 = "name";
     private final String ROW_NAME = "pinetime";
     private final String COLUMN_NAME_2 = "mac";
-    public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "PineTimeInfiniTimeCommunicator.db";
 
-    public Database(Context context) {
+    public DatabaseConnection(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -24,7 +25,7 @@ public class Database extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_1, ROW_NAME);
         values.put(COLUMN_NAME_2, macAddress);
-        long newRowId = db.insert(TABLE_NAME, null, values);
+        db.insert(TABLE_NAME, null, values);
         db.close();
     }
 
@@ -60,7 +61,7 @@ public class Database extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         String selection = COLUMN_NAME_1 + " LIKE ?";
         String[] selectionArgs = { ROW_NAME };
-        int deletedRows = db.delete(TABLE_NAME, selection, selectionArgs);
+        db.delete(TABLE_NAME, selection, selectionArgs);
         db.close();
     }
 

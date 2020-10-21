@@ -16,15 +16,15 @@ import android.widget.Toast;
 import com.example.infinitimeapp.graphics.RecycleViewAdapter;
 import com.example.infinitimeapp.bluetooth.BluetoothDevices;
 import com.example.infinitimeapp.bluetooth.BluetoothService;
-import com.example.infinitimeapp.graphics.StatusChanged;
+import com.example.infinitimeapp.graphics.UpdateUiListener;
 
-public class ScanActivity extends AppCompatActivity implements StatusChanged.StatusChangedListener {
-    public final int PERMISSIONS_REQUEST_LOCATION = 99;
-    public static RecyclerView recyclerView;
+import static com.example.infinitimeapp.common.Constants.*;
 
-    private RecycleViewAdapter mAdapter;
+public class ScanActivity extends AppCompatActivity implements UpdateUiListener.StatusChangedListener {
+    public static RecyclerView mViewRecyclerFoundDevices;
+    private RecycleViewAdapter mViewRecycleAdapter;
     private BluetoothService mBluetoothService;
-    private StatusChanged.StatusChangedListener oldListener;
+    private UpdateUiListener.StatusChangedListener mOldUpdateUiListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,24 +33,24 @@ public class ScanActivity extends AppCompatActivity implements StatusChanged.Sta
 
         checkLocationAccess();
 
-        oldListener = StatusChanged.getInstance().getListener();
-        StatusChanged.getInstance().setListener(this);
+        mOldUpdateUiListener = UpdateUiListener.getInstance().getListener();
+        UpdateUiListener.getInstance().setListener(this);
         mBluetoothService = new BluetoothService(this);
 
-        recyclerView = findViewById(R.id.devicesList);
+        mViewRecyclerFoundDevices = findViewById(R.id.devicesList);
         Button scanButton = findViewById(R.id.scanButton);
 
         scanButton.setOnClickListener(v -> {
             Toast.makeText(ScanActivity.this, "Looking for nearby Pinetime devices", Toast.LENGTH_LONG).show();
             mBluetoothService.scan();
             BluetoothDevices.getInstance().clear();
-            mAdapter.notifyDataSetChanged();
+            mViewRecycleAdapter.notifyDataSetChanged();
         });
 
-        mAdapter = new RecycleViewAdapter(this, mBluetoothService);
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setClickable(true);
+        mViewRecycleAdapter = new RecycleViewAdapter(this, mBluetoothService);
+        mViewRecyclerFoundDevices.setAdapter(mViewRecycleAdapter);
+        mViewRecyclerFoundDevices.setLayoutManager(new LinearLayoutManager(this));
+        mViewRecyclerFoundDevices.setClickable(true);
     }
 
     private void checkLocationAccess() {
@@ -73,14 +73,14 @@ public class ScanActivity extends AppCompatActivity implements StatusChanged.Sta
     @Override
     public void onConnectionChanged(boolean isConnected, BluetoothService bluetoothService) {
         if(isConnected) {
-            StatusChanged.getInstance().setListener(oldListener);
-            StatusChanged.getInstance().getListener().onConnectionChanged(isConnected, bluetoothService);
+            UpdateUiListener.getInstance().setListener(mOldUpdateUiListener);
+            UpdateUiListener.getInstance().getListener().onConnectionChanged(true, bluetoothService);
             finish();
         }
     }
 
     @Override
-    public void updateUI() {
-        mAdapter.notifyDataSetChanged();
+    public void onUpdateUI() {
+        mViewRecycleAdapter.notifyDataSetChanged();
     }
 }

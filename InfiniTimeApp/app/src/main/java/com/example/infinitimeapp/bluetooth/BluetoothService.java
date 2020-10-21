@@ -1,11 +1,13 @@
 package com.example.infinitimeapp.bluetooth;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.infinitimeapp.database.Database;
+import com.example.infinitimeapp.utils.DatabaseConnection;
 import com.example.infinitimeapp.WatchActivity;
-import com.example.infinitimeapp.graphics.StatusChanged;
+import com.example.infinitimeapp.graphics.UpdateUiListener;
+import com.example.infinitimeapp.models.BluetoothDevice;
 import com.example.infinitimeapp.services.PinetimeService;
 import com.polidea.rxandroidble2.RxBleClient;
 import com.polidea.rxandroidble2.RxBleConnection;
@@ -20,17 +22,17 @@ import static com.example.infinitimeapp.common.Constants.TAG;
 
 public class BluetoothService {
     private final RxBleClient mRxBleClient;
-    private final Database mDatabase;
+    private final DatabaseConnection mDatabaseConnection;
 
     private Disposable mScanSubscription;
     private Disposable mConnectionDisposable;
     private RxBleConnection mConnection;
-    private boolean isConnected;
+    private boolean mIsConnected;
 
     public BluetoothService(Context context) {
         mRxBleClient = RxBleClient.create(context);
-        mDatabase = new Database(context);
-        isConnected = false;
+        mDatabaseConnection = new DatabaseConnection(context);
+        mIsConnected = false;
     }
 
     public void scan() {
@@ -49,8 +51,11 @@ public class BluetoothService {
                             if(device.getName() != null && device.getName().contains("InfiniTime")) {
                                 Log.d(TAG, "Found " + device.getMacAddress());
 
-                                BluetoothDevices.BTDeviceModel d = new BluetoothDevices.BTDeviceModel(device.getMacAddress(), device.getName());
-                                BluetoothDevices.getInstance().addDevice(d);
+                                BluetoothDevice bluetoothDevice = new BluetoothDevice.Builder()
+                                        .withName(device.getName())
+                                        .withMac(device.getMacAddress())
+                                        .build();
+                                BluetoothDevices.getInstance().addDevice(bluetoothDevice);
                             }
                         },
                         throwable -> {
@@ -67,15 +72,14 @@ public class BluetoothService {
         }
     }
 
+    @SuppressLint("CheckResult")
     public void connect(String macAddresss) {
         stopScanning();
-
         RxBleDevice mConnectedDevice = mRxBleClient.getBleDevice(macAddresss);
-
-         mConnectedDevice.observeConnectionStateChanges()
+        mConnectedDevice.observeConnectionStateChanges()
                 .subscribe(
                         connectionState -> {
-                            Log.d(TAG, connectionState.toString());
+                            Log.d(TAG, "ConnectionState: " + connectionState.toString());
                         },
                         throwable -> {
                             Log.e(TAG, "Error reading connection state: " + throwable);
@@ -86,13 +90,12 @@ public class BluetoothService {
                 .subscribe(
                         rxBleConnection -> {
                             mConnection = rxBleConnection;
-                            isConnected = true;
-
+                            mIsConnected = true;
                             if(WatchActivity.MAC_Address.isEmpty()) {
-                                mDatabase.saveMACToDatabase(macAddresss);
+                                mDatabaseConnection.saveMACToDatabase(macAddresss);
                             }
 
-                            StatusChanged.getInstance().getListener().onConnectionChanged(isConnected, this);
+                            UpdateUiListener.getInstance().getListener().onConnectionChanged(mIsConnected, this);
                         },
                         e -> {
                             Log.e(TAG, "Error connecting: " + e);
@@ -110,10 +113,10 @@ public class BluetoothService {
     }
 
     public void teardown() {
-        isConnected = false;
+        mIsConnected = false;
         stopScanning();
         stopConnection();
-        StatusChanged.getInstance().getListener().onConnectionChanged(isConnected, this);
+        UpdateUiListener.getInstance().getListener().onConnectionChanged(mIsConnected, this);
     }
 
     public void read(UUID characteristicUUID, PinetimeService service) {
@@ -135,7 +138,7 @@ public class BluetoothService {
         }
         Disposable disposable = mConnection.writeCharacteristic(characteristicUUID, buffer).subscribe(
                 characteristicValue -> {
-                    Log.d(TAG, "Successfully wrote bytes to device.");
+                    //Log.d(TAG, "Successfully wrote bytes to device.");
                 },
                 e -> {
                     Log.e(TAG, e.toString());
@@ -145,6 +148,6 @@ public class BluetoothService {
     }
 
     public boolean isConnected() {
-        return isConnected;
+        return mIsConnected;
     }
 }

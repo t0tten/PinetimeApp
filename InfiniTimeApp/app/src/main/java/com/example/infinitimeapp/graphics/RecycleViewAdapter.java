@@ -12,20 +12,22 @@ import com.example.infinitimeapp.ScanActivity;
 import com.example.infinitimeapp.R;
 import com.example.infinitimeapp.bluetooth.BluetoothDevices;
 import com.example.infinitimeapp.bluetooth.BluetoothService;
+import com.example.infinitimeapp.models.BluetoothDevice;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.ViewHolder> implements View.OnClickListener {
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView alias, mac;
-        ImageView image;
+        private final TextView mViewTextAlias;
+        private final TextView mViewTextMac;
+        private final ImageView mViewImagePinetimeWatch;
 
         public ViewHolder(View v) {
             super(v);
-            alias = v.findViewById(R.id.alias);
-            mac = v.findViewById(R.id.mac_address);
-            image = v.findViewById(R.id.image_view);
+            mViewTextAlias = v.findViewById(R.id.alias);
+            mViewTextMac = v.findViewById(R.id.mac_address);
+            mViewImagePinetimeWatch = v.findViewById(R.id.image_view);
         }
     }
 
@@ -50,23 +52,20 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        BluetoothDevices.BTDeviceModel device = mDevices.getDeviceFromIndex(position);
-
-        holder.alias.setText(device.name);
-        holder.mac.setText(device.mac);
-        holder.image.setImageResource(R.drawable.watch);
+        BluetoothDevice device = mDevices.getDeviceFromIndex(position);
+        holder.mViewTextAlias.setText(device.getName());
+        holder.mViewTextMac.setText(device.getMac());
+        holder.mViewImagePinetimeWatch.setImageResource(R.drawable.watch);
     }
 
     @Override
-    public int getItemCount() {
-        return mDevices.getSize();
-    }
+    public int getItemCount() { return mDevices.getSize(); }
 
     @Override
     public void onClick(View v) {
-        int index = ScanActivity.recyclerView.getChildLayoutPosition(v);
-        BluetoothDevices.BTDeviceModel device = mDevices.getDeviceFromIndex(index);
         Toast.makeText(mContext, "Trying to connect to watch", Toast.LENGTH_LONG).show();
-        mBluetoothService.connect(device.mac);
+        int index = ScanActivity.mViewRecyclerFoundDevices.getChildLayoutPosition(v);
+        BluetoothDevice device = mDevices.getDeviceFromIndex(index);
+        mBluetoothService.connect(device.getMac());
     }
 }

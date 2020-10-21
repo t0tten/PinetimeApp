@@ -1,50 +1,42 @@
 package com.example.infinitimeapp.bluetooth;
 
-import com.example.infinitimeapp.graphics.StatusChanged;
+import com.example.infinitimeapp.graphics.UpdateUiListener;
+import com.example.infinitimeapp.models.BluetoothDevice;
 
 import java.util.ArrayList;
 
 public class BluetoothDevices {
-    public static class BTDeviceModel {
-        public String name;
-        public String mac;
-
-        public BTDeviceModel(String mac, String name) {
-            this.name = name;
-            this.mac = mac;
-        }
-    }
-
-    private static final BluetoothDevices instance = new BluetoothDevices();
-    private final ArrayList<BTDeviceModel> deviceList;
+    private static BluetoothDevices sInstance;
+    private final ArrayList<BluetoothDevice> mDeviceList;
 
     private BluetoothDevices() {
-        deviceList = new ArrayList<>();
+        mDeviceList = new ArrayList<>();
     }
 
     public static BluetoothDevices getInstance() {
-        return instance;
+        if (sInstance == null) sInstance = new BluetoothDevices();
+        return sInstance;
     }
 
-    public void addDevice(BTDeviceModel device) {
-        for(BTDeviceModel d: deviceList) {
-            if(d.mac.equals(device.mac)) {
+    public void addDevice(BluetoothDevice device) {
+        for(BluetoothDevice d: mDeviceList) {
+            if(d.getMac().equals(device.getMac())) {
                 return;
             }
         }
-        deviceList.add(device);
-        StatusChanged.getInstance().getListener().updateUI();
+        mDeviceList.add(device);
+        UpdateUiListener.getInstance().getListener().onUpdateUI();
     }
 
-    public BTDeviceModel getDeviceFromIndex(int index) {
-        return deviceList.get(index);
+    public BluetoothDevice getDeviceFromIndex(int index) {
+        return mDeviceList.get(index);
     }
 
     public int getSize() {
-        return this.deviceList.size();
+        return this.mDeviceList.size();
     }
 
     public void clear() {
-        deviceList.clear();
+        mDeviceList.clear();
     }
 }

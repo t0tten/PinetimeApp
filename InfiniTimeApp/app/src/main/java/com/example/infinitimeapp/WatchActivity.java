@@ -15,15 +15,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
-import com.example.infinitimeapp.common.NotificationService;
-import com.example.infinitimeapp.common.BroadcastReceiver;
-import com.example.infinitimeapp.common.SpotifyConnection;
-import com.example.infinitimeapp.common.Utils;
-import com.example.infinitimeapp.database.Database;
-import com.example.infinitimeapp.graphics.StatusChanged;
+import com.example.infinitimeapp.listeners.NotificationService;
+import com.example.infinitimeapp.listeners.SpotifyBroadcastReceiver;
+import com.example.infinitimeapp.utils.DatabaseConnection;
+import com.example.infinitimeapp.graphics.UpdateUiListener;
+import com.example.infinitimeapp.models.TrackInformation;
 import com.example.infinitimeapp.services.AlertNotificationService;
+import com.example.infinitimeapp.services.CurrentTimeService;
 import com.example.infinitimeapp.services.DeviceInformationService;
 import com.example.infinitimeapp.services.MusicService;
+import com.example.infinitimeapp.utils.SpotifyConnection;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,31 +32,31 @@ import androidx.appcompat.app.AppCompatActivity;
 import static com.example.infinitimeapp.common.Constants.TAG;
 
 public class WatchActivity extends AppCompatActivity implements NotificationService.NotificationListener,
-                                                                BroadcastReceiver.ReceiverListener,
-                                                                StatusChanged.StatusChangedListener {
-    TextView manufacturer;
-    TextView model;
-    TextView serial;
-    TextView fw_revision;
-    TextView hw_revision;
-    TextView sw_revision;
+                                                                SpotifyBroadcastReceiver.ReceiverListener,
+                                                                UpdateUiListener.StatusChangedListener {
+    TextView mViewTextManufacturer;
+    TextView mViewTextModel;
+    TextView mViewTextSerial;
+    TextView mViewTextFwRevision;
+    TextView mViewTextHwRevision;
+    TextView mViewTextSwRevision;
 
-    EditText alertMessage;
-    EditText musicTrack;
-    EditText musicArtist;
-    EditText musicAlbum;
+    EditText mViewEditAlertMessage;
+    EditText mViewEditMusicTrack;
+    EditText mViewEditMusicArtist;
+    EditText mViewEditMusicAlbum;
 
-    Button disconnectButton;
-    Button sendAlert;
-    Button sendMusicInfo;
-    Switch playingButton;
+    Button mButtonDisconnect;
+    Button mButtonSendAlert;
+    Button mButtonSendMusicInfo;
+    Switch mButtonSendPlayingState;
 
-    DeviceInformationService deviceInformationService = DeviceInformationService.getInstance();
-    AlertNotificationService alertNotificationService = AlertNotificationService.getInstance();
+    DeviceInformationService mDeviceInformationService = DeviceInformationService.getsInstance();
+    AlertNotificationService mAlertNotificationService = AlertNotificationService.getInstance();
 
-    Database database = new Database(this);
-    SpotifyConnection mSpotifyConnection;
+    DatabaseConnection mDatabaseConnection;
     BluetoothService mBluetoothService;
+    SpotifyConnection mSpotifyConnection;
 
     static final int REQUEST_ENABLE_BT = 1;
     public static String MAC_Address = "";
@@ -63,8 +64,12 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate()");
+        //Log.d(TAG, "onCreate()");
+
         setContentView(R.layout.activity_watch);
+
+        mDatabaseConnection = new DatabaseConnection(this);
+        UpdateUiListener.getInstance().setListener(this);
 
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -77,52 +82,115 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         checkNotificationPermissions();
 
         new NotificationService().setListener(this);
-        new BroadcastReceiver().setListener(this);
-        StatusChanged.getInstance().setListener(this);
+        new SpotifyBroadcastReceiver().setListener(this);
 
         getViewObjects();
         applyButtonClickListers();
+
+        makeBluetoothConnection();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //Log.d(TAG, "onStart");
+
+        if(mSpotifyConnection == null) {
+            mSpotifyConnection = new SpotifyConnection(this);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //Log.d(TAG, "onDestroy");
+        teardown();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        //Log.d(TAG, "onStop");
+        if(mSpotifyConnection != null) {
+            mSpotifyConnection.teardown();
+        }
+    }
+
+    private void teardown() {
+        if(mBluetoothService != null && mBluetoothService.isConnected()) {
+            mBluetoothService.teardown();
+        }
+    }
+
+    private void makeBluetoothConnection() {
+        if(mBluetoothService == null) {
+            MAC_Address = mDatabaseConnection.readMACFromDatabase();
+            if(MAC_Address.isEmpty()) {
+                Intent intent = new Intent(getApplicationContext(), ScanActivity.class);
+                startActivity(intent);
+            } else {
+                showToast("Attempting to connect to:\n" + MAC_Address);
+                mBluetoothService = new BluetoothService(this);
+                mBluetoothService.connect(MAC_Address);
+            }
+        }
+    }
+
+    private void initWatch() {
+        DeviceInformationService s = DeviceInformationService.getsInstance();
+        s.getHwRevisionId(mBluetoothService);
+        s.getFwRevisionId(mBluetoothService);
+        s.getManufaturer(mBluetoothService);
+        s.getSerial(mBluetoothService);
+        s.getSwRevisionId(mBluetoothService);
+        s.getModel(mBluetoothService);
+
+        CurrentTimeService.getInstance().updateTime(mBluetoothService);
     }
 
     private void applyButtonClickListers() {
-        disconnectButton.setOnClickListener(v -> {
+        mButtonDisconnect.setOnClickListener(v -> {
             mBluetoothService.teardown();
             showToast("Disconnecting from watch");
-            database.removeMacFromDatabase();
+            mDatabaseConnection.removeMacFromDatabase();
         });
 
-        sendAlert.setOnClickListener(v -> {
-            String message = alertMessage.getText().toString();
+        mButtonSendAlert.setOnClickListener(v -> {
+            String message = mViewEditAlertMessage.getText().toString();
             if(message.isEmpty()) {
                 Log.e(TAG, "Message is empty");
                 showEmptyErrorAlert();
                 return;
             }
             showToast("Sending alert: " + message);
-            alertMessage.setText("");
-            alertNotificationService.sendMessage(mBluetoothService, message);
+            mViewEditAlertMessage.setText("");
+            mAlertNotificationService.sendMessage(mBluetoothService, message);
         });
 
-        sendMusicInfo.setOnClickListener(v -> {
-            String track = musicTrack.getText().toString();
-            String artist = musicArtist.getText().toString();
-            String album = musicAlbum.getText().toString();
-            boolean isPlaying = playingButton.isChecked();
+        mButtonSendMusicInfo.setOnClickListener(v -> {
+            String track = mViewEditMusicTrack.getText().toString();
+            String artist = mViewEditMusicArtist.getText().toString();
+            String album = mViewEditMusicAlbum.getText().toString();
+            boolean isPlaying = mButtonSendPlayingState.isChecked();
 
             if(!track.isEmpty()) {
-                musicTrack.setText("");
-                MusicService.getInstance().sendTrack(mBluetoothService, track);
+                mViewEditMusicTrack.setText("");
             }
 
             if(!artist.isEmpty()) {
-                musicArtist.setText("");
-                MusicService.getInstance().sendArtist(mBluetoothService, artist);
+                mViewEditMusicArtist.setText("");
             }
 
             if(!album.isEmpty()) {
-                musicAlbum.setText("");
-                MusicService.getInstance().sendAlbum(mBluetoothService, album);
+                mViewEditMusicAlbum.setText("");
             }
+
+            TrackInformation trackInformation = new TrackInformation.Builder()
+                    .withArtist(artist)
+                    .withTrack(track)
+                    .withAlbum(album)
+                    .build();
+            MusicService.getInstance().sendTrackInformation(mBluetoothService, trackInformation);
 
             MusicService.getInstance().sendStatus(mBluetoothService, isPlaying);
             showToast("Sending music information");
@@ -130,32 +198,32 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     }
 
     private void getViewObjects() {
-        manufacturer = findViewById(R.id.txt_manufacturer);
-        model = findViewById(R.id.txt_model);
-        serial = findViewById(R.id.txt_serial);
-        fw_revision = findViewById(R.id.txt_fw_revision);
-        hw_revision = findViewById(R.id.txt_hw_revision);
-        sw_revision = findViewById(R.id.txt_sw_revision);
+        mViewTextManufacturer = findViewById(R.id.txt_manufacturer);
+        mViewTextModel = findViewById(R.id.txt_model);
+        mViewTextSerial = findViewById(R.id.txt_serial);
+        mViewTextFwRevision = findViewById(R.id.txt_fw_revision);
+        mViewTextHwRevision = findViewById(R.id.txt_hw_revision);
+        mViewTextSwRevision = findViewById(R.id.txt_sw_revision);
 
-        alertMessage = findViewById(R.id.input_alert);
-        musicTrack = findViewById(R.id.input_track);
-        musicArtist = findViewById(R.id.input_artist);
-        musicAlbum = findViewById(R.id.input_album);
+        mViewEditAlertMessage = findViewById(R.id.input_alert);
+        mViewEditMusicTrack = findViewById(R.id.input_track);
+        mViewEditMusicArtist = findViewById(R.id.input_artist);
+        mViewEditMusicAlbum = findViewById(R.id.input_album);
 
-        disconnectButton = findViewById(R.id.button_disconnect);
-        sendAlert = findViewById(R.id.button_alert);
-        sendMusicInfo = findViewById(R.id.button_music);
-        playingButton = findViewById(R.id.button_playing);
+        mButtonDisconnect = findViewById(R.id.button_disconnect);
+        mButtonSendAlert = findViewById(R.id.button_alert);
+        mButtonSendMusicInfo = findViewById(R.id.button_music);
+        mButtonSendPlayingState = findViewById(R.id.button_playing);
     }
 
     public void updateDeviceInformation() {
         runOnUiThread(() -> {
-            manufacturer.setText(String.format("%s %s", getString(R.string.manufacturer), deviceInformationService.mManufacturer));
-            model.setText(String.format("%s %s", getString(R.string.model), deviceInformationService.mModel));
-            serial.setText(String.format("%s %s", getString(R.string.serial), deviceInformationService.mSerial));
-            fw_revision.setText(String.format("%s %s", getString(R.string.fw_revision), deviceInformationService.mFw_revision));
-            hw_revision.setText(String.format("%s %s", getString(R.string.hw_revision), deviceInformationService.mHw_revision));
-            sw_revision.setText(String.format("%s %s", getString(R.string.sw_revision), deviceInformationService.mSw_revision));
+            mViewTextManufacturer.setText(String.format("%s %s", getString(R.string.manufacturer), mDeviceInformationService.mManufacturer));
+            mViewTextModel.setText(String.format("%s %s", getString(R.string.model), mDeviceInformationService.mModel));
+            mViewTextSerial.setText(String.format("%s %s", getString(R.string.serial), mDeviceInformationService.mSerial));
+            mViewTextFwRevision.setText(String.format("%s %s", getString(R.string.fw_revision), mDeviceInformationService.mFw_revision));
+            mViewTextHwRevision.setText(String.format("%s %s", getString(R.string.hw_revision), mDeviceInformationService.mHw_revision));
+            mViewTextSwRevision.setText(String.format("%s %s", getString(R.string.sw_revision), mDeviceInformationService.mSw_revision));
         });
     }
 
@@ -172,55 +240,21 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     }
 
     private void enableDisableUI(boolean isEnabled) {
-        manufacturer.setEnabled(isEnabled);
-        model.setEnabled(isEnabled);
-        serial.setEnabled(isEnabled);
-        fw_revision.setEnabled(isEnabled);
-        hw_revision.setEnabled(isEnabled);
-        sw_revision.setEnabled(isEnabled);
+        mViewTextManufacturer.setEnabled(isEnabled);
+        mViewTextModel.setEnabled(isEnabled);
+        mViewTextSerial.setEnabled(isEnabled);
+        mViewTextFwRevision.setEnabled(isEnabled);
+        mViewTextHwRevision.setEnabled(isEnabled);
+        mViewTextSwRevision.setEnabled(isEnabled);
 
-        alertMessage.setEnabled(isEnabled);
-        musicTrack.setEnabled(isEnabled);
-        musicArtist.setEnabled(isEnabled);
-        musicAlbum.setEnabled(isEnabled);
+        mViewEditAlertMessage.setEnabled(isEnabled);
+        mViewEditMusicTrack.setEnabled(isEnabled);
+        mViewEditMusicArtist.setEnabled(isEnabled);
+        mViewEditMusicAlbum.setEnabled(isEnabled);
 
-        disconnectButton.setEnabled(isEnabled);
-        sendAlert.setEnabled(isEnabled);
-        sendMusicInfo.setEnabled(isEnabled);
-    }
-
-    @Override
-    public void onDestroy() {
-        if(mBluetoothService.isConnected()) {
-            mBluetoothService.teardown();
-        }
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "UpdateUI");
-        if(mBluetoothService == null) {
-            MAC_Address = database.readMACFromDatabase();
-            if(MAC_Address.isEmpty()) {
-                Intent intent = new Intent(getApplicationContext(), ScanActivity.class);
-                startActivity(intent);
-            } else {
-                showToast("Attempting to connect to:\n" + MAC_Address);
-                mBluetoothService = new BluetoothService(this);
-                mBluetoothService.connect(MAC_Address);
-            }
-        }
-
-        /*mSpotifyConnection = new SpotifyConnection(this);
-        MusicService.getInstance().useSpotifyConnection(mSpotifyConnection);*/
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        //mSpotifyConnection.teardown();
+        mButtonDisconnect.setEnabled(isEnabled);
+        mButtonSendAlert.setEnabled(isEnabled);
+        mButtonSendMusicInfo.setEnabled(isEnabled);
     }
 
     @Override
@@ -244,29 +278,30 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     }
 
     @Override
-    public void onBroadcastReceive(String action) {
-        if(action.equals("newTackInformation")) {
-            Log.d(TAG, "onNotifyReceive - Action: " + action);
-            /*SpotifyConnection.TrackInformation trackInformation = mSpotifyConnection.getTrackInformation();
-            MusicService.getInstance().sendArtist(trackInformation.getArtist());
-            MusicService.getInstance().sendTrack(trackInformation.getTrack());
-            MusicService.getInstance().sendAlbum(trackInformation.getAlbum());*/
-        }
+    public void onPlayingStateChanged(boolean isPlaying) {
+        MusicService.getInstance().sendStatus(mBluetoothService, isPlaying);
+    }
+
+    @Override
+    public void onTrackChanged(TrackInformation trackInformation) {
+        MusicService.getInstance().sendTrackInformation(mBluetoothService, trackInformation);
     }
 
     @Override
     public void onConnectionChanged(boolean isConnected, BluetoothService bluetoothService) {
         if(isConnected) {
-            mBluetoothService = bluetoothService;
+            if(mBluetoothService == null) {
+                mBluetoothService = bluetoothService;
+            }
             enableDisableUI(true);
-            Utils.init(mBluetoothService);
+            initWatch();
         } else {
             enableDisableUI(false);
         }
     }
 
     @Override
-    public void updateUI() {
+    public void onUpdateUI() {
         updateDeviceInformation();
     }
 }

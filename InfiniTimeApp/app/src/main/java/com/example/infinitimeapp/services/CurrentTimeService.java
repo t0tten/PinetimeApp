@@ -6,20 +6,21 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Calendar;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CurrentTimeService extends BaseService {
     private static final String CURRENT_TIME = "CURRENT_TIME";
-
-    private static CurrentTimeService sInstance = null;
+    private static CurrentTimeService sInstance;
 
     private CurrentTimeService() {
-        CHAR_MAP.put(CURRENT_TIME, "00002a2b-0000-1000-8000-00805f9b34fb");
+        super(Stream.of(new String[][]{
+                {CURRENT_TIME, "00002a2b-0000-1000-8000-00805f9b34fb"}
+        }).collect(Collectors.toMap(p -> p[0], p -> p[1])));
     }
 
     public static CurrentTimeService getInstance() {
-        if (sInstance == null)
-            sInstance = new CurrentTimeService();
-
+        if (sInstance == null) sInstance = new CurrentTimeService();
         return sInstance;
     }
 

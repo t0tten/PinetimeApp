@@ -22,7 +22,7 @@
             android:screenOrientation="portrait">
         </activity>
         <service
-            android:name=".common.NotificationService"
+            android:name=".listeners.NotificationService"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" >
             <intent-filter>
@@ -30,10 +30,14 @@
                     android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-        <receiver android:name=".common.BroadcastReceiver">
+        <receiver
+            android:name=".listeners.SpotifyBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.example.infinitime.newTrackInformation" />
-                <action android:name="com.example.infinitime.update" />
+                <action android:name="com.spotify.music.playbackstatechanged"/>
+                <action android:name="com.spotify.music.metadatachanged"/>
+                <action android:name="com.spotify.music.queuechanged"/>
             </intent-filter>
         </receiver>
     </application>
