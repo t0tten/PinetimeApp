@@ -1,7 +1,7 @@
 package com.example.infinitimeapp.services;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
-import com.example.infinitimeapp.graphics.UpdateUiListener;
+import com.example.infinitimeapp.listeners.UpdateUiListener;
 
 import java.util.UUID;
 import java.util.stream.Collectors;

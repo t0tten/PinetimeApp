@@ -1,6 +1,6 @@
 package com.example.infinitimeapp.bluetooth;
 
-import com.example.infinitimeapp.graphics.UpdateUiListener;
+import com.example.infinitimeapp.listeners.UpdateUiListener;
 import com.example.infinitimeapp.models.BluetoothDevice;
 
 import java.util.ArrayList;

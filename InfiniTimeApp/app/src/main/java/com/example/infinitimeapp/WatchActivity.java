@@ -18,7 +18,7 @@ import com.example.infinitimeapp.bluetooth.BluetoothService;
 import com.example.infinitimeapp.listeners.NotificationService;
 import com.example.infinitimeapp.listeners.SpotifyBroadcastReceiver;
 import com.example.infinitimeapp.utils.DatabaseConnection;
-import com.example.infinitimeapp.graphics.UpdateUiListener;
+import com.example.infinitimeapp.listeners.UpdateUiListener;
 import com.example.infinitimeapp.models.TrackInformation;
 import com.example.infinitimeapp.services.AlertNotificationService;
 import com.example.infinitimeapp.services.CurrentTimeService;
@@ -97,6 +97,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
         if(mSpotifyConnection == null) {
             mSpotifyConnection = new SpotifyConnection(this);
+            MusicService.getInstance().useSpotifyConnection(mSpotifyConnection);
         }
     }
 
@@ -303,5 +304,21 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     @Override
     public void onUpdateUI() {
         updateDeviceInformation();
+    }
+
+    @Override
+    public void onSpotifyConnectionChange(boolean isConnected) {
+        String message;
+        if(!isConnected) {
+            message = "Could not connect to Remote Spotify.";
+            new AlertDialog.Builder(this)
+                    .setTitle("Remote Spotify")
+                    .setMessage(message)
+                    .setNeutralButton("OK", null)
+                    .show();
+        } else {
+            message = "Connected to Remote Spotify.\nYou can now control spotify from watch.";
+            showToast(message);
+        }
     }
 }

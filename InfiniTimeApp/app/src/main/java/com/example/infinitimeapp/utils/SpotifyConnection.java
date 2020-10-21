@@ -3,6 +3,7 @@ package com.example.infinitimeapp.utils;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.infinitimeapp.listeners.UpdateUiListener;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -31,11 +32,13 @@ public class SpotifyConnection {
                         public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                             mSpotifyAppRemote = spotifyAppRemote;
                             mIsConnected = true;
+                            UpdateUiListener.getInstance().getListener().onSpotifyConnectionChange(true);
                             Log.d(TAG, "Connected to spotify client");
                         }
 
                         @Override
                         public void onFailure(Throwable throwable) {
+                            UpdateUiListener.getInstance().getListener().onSpotifyConnectionChange(false);
                             Log.e(TAG, throwable.getMessage(), throwable);
                         }
                     });

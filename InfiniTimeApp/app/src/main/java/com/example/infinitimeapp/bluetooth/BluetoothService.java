@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.example.infinitimeapp.utils.DatabaseConnection;
 import com.example.infinitimeapp.WatchActivity;
-import com.example.infinitimeapp.graphics.UpdateUiListener;
+import com.example.infinitimeapp.listeners.UpdateUiListener;
 import com.example.infinitimeapp.models.BluetoothDevice;
 import com.example.infinitimeapp.services.PinetimeService;
 import com.polidea.rxandroidble2.RxBleClient;

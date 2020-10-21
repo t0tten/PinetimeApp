@@ -1,4 +1,4 @@
-package com.example.infinitimeapp.graphics;
+package com.example.infinitimeapp.listeners;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
 
@@ -6,6 +6,7 @@ public class UpdateUiListener {
     public interface StatusChangedListener {
         void onConnectionChanged(boolean isConnected, BluetoothService bluetoothService);
         void onUpdateUI();
+        void onSpotifyConnectionChange(boolean isConnected);
     }
 
     public static UpdateUiListener sInstance;
