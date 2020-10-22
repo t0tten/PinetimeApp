@@ -83,6 +83,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
         new NotificationService().setListener(this);
         new SpotifyBroadcastReceiver().setListener(this);
+        mSpotifyConnection = new SpotifyConnection();
 
         getViewObjects();
         applyButtonClickListers();
@@ -95,8 +96,9 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         super.onStart();
         //Log.d(TAG, "onStart");
 
-        if(mSpotifyConnection == null) {
-            mSpotifyConnection = new SpotifyConnection(this);
+        if(mSpotifyConnection != null) {
+            mSpotifyConnection.teardown();
+            mSpotifyConnection.connect(this);
             MusicService.getInstance().useSpotifyConnection(mSpotifyConnection);
         }
     }

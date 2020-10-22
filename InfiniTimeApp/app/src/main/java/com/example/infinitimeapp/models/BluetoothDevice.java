@@ -35,6 +35,7 @@ public class BluetoothDevice {
 
         @Override
         public Build withMac(String mac) {
+            if(mName == null) throw new NullPointerException("Name is null");
             mMac = mac;
             return this;
         }

@@ -13,18 +13,21 @@ import static com.example.infinitimeapp.common.Constants.*;
 public class SpotifyConnection {
     private static final String CLIENT_ID = "";
     private static final String REDIRECT_URI = "http://com.example.infinitimeapp/callback";
+    private final ConnectionParams connectionParams;
 
     private SpotifyAppRemote mSpotifyAppRemote;
     private boolean mIsConnected;
 
-    public SpotifyConnection(Context context) {
+    public SpotifyConnection() {
         mIsConnected = false;
-        try {
-            ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
-                    .setRedirectUri(REDIRECT_URI)
-                    .showAuthView(true)
-                    .build();
+        connectionParams = new ConnectionParams.Builder(CLIENT_ID)
+                .setRedirectUri(REDIRECT_URI)
+                .showAuthView(true)
+                .build();
+    }
 
+    public void connect(Context context) {
+        try {
             SpotifyAppRemote.connect(context, connectionParams,
                     new Connector.ConnectionListener() {
 
