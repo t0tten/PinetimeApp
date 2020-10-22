@@ -96,7 +96,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         super.onStart();
         //Log.d(TAG, "onStart");
 
-        if(mSpotifyConnection != null) {
+        if(mSpotifyConnection != null && !mSpotifyConnection.isConnected()) {
             mSpotifyConnection.teardown();
             mSpotifyConnection.connect(this);
             MusicService.getInstance().useSpotifyConnection(mSpotifyConnection);
