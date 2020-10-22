@@ -1,7 +1,7 @@
 # PinetimeApp
 Pinetime Infinitime Android application that can send and receive information from Pinetime watch.
 
-# Features
+## Features
 * Scan for Pinetime Infinitime devices
 * Save connected device
 * Forget connected device
