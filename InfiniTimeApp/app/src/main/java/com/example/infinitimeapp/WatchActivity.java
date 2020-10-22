@@ -108,15 +108,16 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         super.onDestroy();
         //Log.d(TAG, "onDestroy");
         teardown();
+        if(mSpotifyConnection != null) {
+            mSpotifyConnection.teardown();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         //Log.d(TAG, "onStop");
-        if(mSpotifyConnection != null) {
-            mSpotifyConnection.teardown();
-        }
+
     }
 
     private void teardown() {
@@ -149,6 +150,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         s.getModel(mBluetoothService);
 
         CurrentTimeService.getInstance().updateTime(mBluetoothService);
+        MusicService.getInstance().subscribeOnEvents(mBluetoothService);
     }
 
     private void applyButtonClickListers() {

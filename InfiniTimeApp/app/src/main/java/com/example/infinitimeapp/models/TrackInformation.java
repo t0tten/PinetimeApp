@@ -1,7 +1,5 @@
 package com.example.infinitimeapp.models;
 
-import androidx.annotation.NonNull;
-
 public class TrackInformation {
     String mArtist;
     String mTrack;
@@ -45,7 +43,6 @@ public class TrackInformation {
 
         @Override
         public AlbumStep withTrack(String track) {
-            if(mAlbum == null) throw new NullPointerException("Artist is null");
             mTrack = track;
             return this;
         }

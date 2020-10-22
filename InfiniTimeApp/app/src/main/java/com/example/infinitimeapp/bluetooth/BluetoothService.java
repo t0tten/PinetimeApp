@@ -1,9 +1,9 @@
 package com.example.infinitimeapp.bluetooth;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.infinitimeapp.services.MusicService;
 import com.example.infinitimeapp.utils.DatabaseConnection;
 import com.example.infinitimeapp.WatchActivity;
 import com.example.infinitimeapp.listeners.UpdateUiListener;
@@ -37,31 +37,24 @@ public class BluetoothService {
 
     public void scan() {
         teardown();
-        if(mScanSubscription != null) {
-            Log.e(TAG, "Error already scanning for bluetooth devices.");
-            return;
-        }
-        Log.d(TAG, "Started scanning for bluetooth devices.");
-        mScanSubscription = mRxBleClient.scanBleDevices(
-                new ScanSettings.Builder().build()
-        )
+        if(mScanSubscription == null) {
+            Log.d(TAG, "Started scanning for bluetooth devices.");
+            mScanSubscription = mRxBleClient
+                .scanBleDevices(new ScanSettings.Builder().build())
                 .subscribe(
-                        scanResult -> {
-                            RxBleDevice device = scanResult.getBleDevice();
-                            if(device.getName() != null && device.getName().contains("InfiniTime")) {
-                                Log.d(TAG, "Found " + device.getMacAddress());
+                    scanResult -> {
+                        RxBleDevice device = scanResult.getBleDevice();
+                        if (device.getName() != null && device.getName().contains("InfiniTime")) {
+                            Log.d(TAG, "Found " + device.getMacAddress());
 
-                                BluetoothDevice bluetoothDevice = new BluetoothDevice.Builder()
-                                        .withName(device.getName())
-                                        .withMac(device.getMacAddress())
-                                        .build();
-                                BluetoothDevices.getInstance().addDevice(bluetoothDevice);
-                            }
-                        },
-                        throwable -> {
-                            Log.d(TAG, throwable.toString());
+                            BluetoothDevice bluetoothDevice = new BluetoothDevice.Builder()
+                                .withName(device.getName())
+                                .withMac(device.getMacAddress())
+                                .build();
+                            BluetoothDevices.getInstance().addDevice(bluetoothDevice);
                         }
-                );
+                    }, Throwable::printStackTrace);
+        }
     }
 
     private void stopScanning() {
@@ -72,36 +65,36 @@ public class BluetoothService {
         }
     }
 
-    @SuppressLint("CheckResult")
     public void connect(String macAddresss) {
         stopScanning();
-        RxBleDevice mConnectedDevice = mRxBleClient.getBleDevice(macAddresss);
-        mConnectedDevice.observeConnectionStateChanges()
-                .subscribe(
-                        connectionState -> {
-                            Log.d(TAG, "ConnectionState: " + connectionState.toString());
-                        },
-                        throwable -> {
-                            Log.e(TAG, "Error reading connection state: " + throwable);
-                        }
-                );
+        RxBleDevice connectedDevice = mRxBleClient.getBleDevice(macAddresss);
+        Disposable disposable = connectedDevice.observeConnectionStateChanges()
+            .subscribe(
+                connectionState -> {
+                    if(connectionState != RxBleConnection.RxBleConnectionState.CONNECTED) {
+                        this.connect(macAddresss);
+                    }
+                }, Throwable::printStackTrace);
 
-        mConnectionDisposable = mConnectedDevice.establishConnection(true)
-                .subscribe(
-                        rxBleConnection -> {
-                            mConnection = rxBleConnection;
-                            mIsConnected = true;
-                            if(WatchActivity.MAC_Address.isEmpty()) {
-                                mDatabaseConnection.saveMACToDatabase(macAddresss);
-                            }
+        mConnectionDisposable = connectedDevice.establishConnection(true)
+            .subscribe(
+                rxBleConnection -> {
+                    mConnection = rxBleConnection;
+                    mIsConnected = true;
+                    if(WatchActivity.MAC_Address.isEmpty()) {
+                        mDatabaseConnection.saveMACToDatabase(macAddresss);
+                    }
+                    UpdateUiListener.getInstance().getListener().onConnectionChanged(mIsConnected, this);
+                }, Throwable::printStackTrace);
+    }
 
-                            UpdateUiListener.getInstance().getListener().onConnectionChanged(mIsConnected, this);
-                        },
-                        e -> {
-                            Log.e(TAG, "Error connecting: " + e);
-                            e.printStackTrace();
-                        }
-                );
+    public void listenOnCharacteristic(UUID characteristicUUID) {
+        Disposable disposable = mConnection.setupNotification(characteristicUUID)
+            .flatMap(notificationObservable -> notificationObservable)
+            .subscribe(
+                bytes -> {
+                    MusicService.getInstance().onDataRecieved(characteristicUUID, bytes);
+                }, Throwable::printStackTrace);
     }
 
     private void stopConnection() {
@@ -123,28 +116,19 @@ public class BluetoothService {
         if(mConnection == null) {
             return;
         }
-        Disposable disposable = mConnection.readCharacteristic(characteristicUUID).subscribe(
-                characteristicValue -> {
-                    service.onDataRecieved(characteristicUUID, characteristicValue);
-                },
-                throwable -> {
-                    Log.e(TAG, throwable.toString());
-                });
+        Disposable disposable = mConnection.readCharacteristic(characteristicUUID)
+            .subscribe(characteristicValue -> {
+                service.onDataRecieved(characteristicUUID, characteristicValue);
+            }, Throwable::printStackTrace);
     }
 
     public void write(UUID characteristicUUID, byte[] buffer) {
         if(mConnection == null) {
             return;
         }
-        Disposable disposable = mConnection.writeCharacteristic(characteristicUUID, buffer).subscribe(
-                characteristicValue -> {
-                    //Log.d(TAG, "Successfully wrote bytes to device.");
-                },
-                e -> {
-                    Log.e(TAG, e.toString());
-                    e.printStackTrace();
-                }
-        );
+        Disposable disposable = mConnection
+            .writeCharacteristic(characteristicUUID, buffer)
+            .subscribe(characteristicValue -> {}, Throwable::printStackTrace);
     }
 
     public boolean isConnected() {

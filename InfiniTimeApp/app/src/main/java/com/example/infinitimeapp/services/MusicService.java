@@ -1,9 +1,6 @@
 package com.example.infinitimeapp.services;
 
-import android.util.Log;
-
 import com.example.infinitimeapp.bluetooth.BluetoothService;
-import com.example.infinitimeapp.common.Constants;
 import com.example.infinitimeapp.utils.SpotifyConnection;
 import com.example.infinitimeapp.models.TrackInformation;
 
@@ -56,7 +53,6 @@ public class MusicService extends BaseService {
 
     private void eventHandler(byte[] message) {
         if(mSpotifyConnection != null) {
-            final char EVENT_MUSIC_OPEN = 0xe0;
             final char EVENT_MUSIC_PLAY = 0x00;
             final char EVENT_MUSIC_PAUSE = 0x01;
             final char EVENT_MUSIC_NEXT = 0x03;
@@ -107,6 +103,10 @@ public class MusicService extends BaseService {
         sendArtist(bluetoothService, trackInformation.getArtist());
         sendTrack(bluetoothService, trackInformation.getTrack());
         sendAlbum(bluetoothService, trackInformation.getAlbum());
+    }
+
+    public void subscribeOnEvents(BluetoothService bluetoothService) {
+        bluetoothService.listenOnCharacteristic(getCharacteristicUUID(EVENT));
     }
 
     public void sendStatus(BluetoothService bluetoothService, boolean isPlaying) {

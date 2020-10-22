@@ -32,6 +32,6 @@ public class AlertNotificationService extends BaseService {
     }
 
     public void sendMessage(BluetoothService bluetoothService, String message) {
-        bluetoothService.write(getCharacteristicUUID(NEW_ALERT), message.getBytes(StandardCharsets.US_ASCII));
+        bluetoothService.write(getCharacteristicUUID(NEW_ALERT), message.getBytes(StandardCharsets.ISO_8859_1));
     }
 }
