@@ -12,3 +12,4 @@ Pinetime Infinitime Android application that can send and receive information fr
 * Manually send TrackInformation(Track, Artist, Album, Playing, Pause)
 * Receive TrackInformation from Spotify
 * Remote control Spotify(Next song, Previous song, Play, Pause, Volume Up, Volume Down)
+* Send device notifications to watch
