@@ -1,11 +1,14 @@
 package com.example.infinitimeapp;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
@@ -28,7 +31,9 @@ import com.example.infinitimeapp.utils.SpotifyConnection;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import static com.example.infinitimeapp.common.Constants.DELAY;
 import static com.example.infinitimeapp.common.Constants.TAG;
 
 public class WatchActivity extends AppCompatActivity implements NotificationService.NotificationListener,
@@ -57,6 +62,9 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     DatabaseConnection mDatabaseConnection;
     BluetoothService mBluetoothService;
     SpotifyConnection mSpotifyConnection;
+
+    Handler handler = new Handler();;
+    Runnable runnable;
 
     static final int REQUEST_ENABLE_BT = 1;
     public static String MAC_Address = "";
@@ -151,6 +159,17 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
         CurrentTimeService.getInstance().updateTime(mBluetoothService);
         MusicService.getInstance().subscribeOnEvents(mBluetoothService);
+
+        handler.postDelayed(runnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "RUNNING");
+                CurrentTimeService.getInstance().updateTime(mBluetoothService);
+                handler.postDelayed(runnable, DELAY);
+            }
+        }, DELAY);
+
+
     }
 
     private void applyButtonClickListers() {
@@ -264,13 +283,17 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
     @Override
     public void sendNotificationToWatch(String message) {
-        //AlertNotificationService.getInstance().sendMessage(message);
+        AlertNotificationService.getInstance().sendMessage(mBluetoothService, message);
     }
 
     private void checkNotificationPermissions() {
         // Check permission for notification access
+        if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE) == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Got permission");
+        }
+
         String enabledNotificationListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
-        if (enabledNotificationListeners == null || !enabledNotificationListeners.contains(getPackageName())) {
+        if (enabledNotificationListeners == null || !enabledNotificationListeners.contains("com.example.infinitimeapp.listeners.NotificationService")) {
             new AlertDialog.Builder(this)
                     .setTitle("Need permission")
                     .setMessage("If you want to send notifications to device we need notification access.")
@@ -311,18 +334,5 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     }
 
     @Override
-    public void onSpotifyConnectionChange(boolean isConnected) {
-        String message;
-        if(!isConnected) {
-            message = "Could not connect to Remote Spotify.";
-            new AlertDialog.Builder(this)
-                    .setTitle("Remote Spotify")
-                    .setMessage(message)
-                    .setNeutralButton("OK", null)
-                    .show();
-        } else {
-            message = "Connected to Remote Spotify.\nYou can now control spotify from watch.";
-            showToast(message);
-        }
-    }
+    public void onSpotifyConnectionChange(boolean isConnected) {}
 }

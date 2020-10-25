@@ -2,7 +2,6 @@ package com.example.infinitimeapp.services;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
 
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +31,7 @@ public class AlertNotificationService extends BaseService {
     }
 
     public void sendMessage(BluetoothService bluetoothService, String message) {
-        bluetoothService.write(getCharacteristicUUID(NEW_ALERT), message.getBytes(StandardCharsets.ISO_8859_1));
+        message = message.replaceAll("[^a-zA-Z: ]","");
+        bluetoothService.write(getCharacteristicUUID(NEW_ALERT), message.getBytes());
     }
 }

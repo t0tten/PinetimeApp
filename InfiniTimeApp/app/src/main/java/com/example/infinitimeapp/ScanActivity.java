@@ -85,17 +85,5 @@ public class ScanActivity extends AppCompatActivity implements UpdateUiListener.
     }
 
     @Override
-    public void onSpotifyConnectionChange(boolean isConnected) {
-        String message = "";
-        if(!isConnected) {
-            message = "Could not connect to Remote Spotify";
-        } else {
-            message = "Connected to Remote Spotify";
-        }
-        new AlertDialog.Builder(this)
-                .setTitle("Remote Spotify")
-                .setMessage(message)
-                .setNeutralButton("OK", null)
-                .show();
-    }
+    public void onSpotifyConnectionChange(boolean isConnected) {}
 }
