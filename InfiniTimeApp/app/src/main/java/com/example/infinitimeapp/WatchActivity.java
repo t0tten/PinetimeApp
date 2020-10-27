@@ -69,13 +69,15 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     static final int REQUEST_ENABLE_BT = 1;
     public static String MAC_Address = "";
 
+    private boolean mAutoConnect;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Log.d(TAG, "onCreate()");
-
         setContentView(R.layout.activity_watch);
 
+        mAutoConnect = true;
         mDatabaseConnection = new DatabaseConnection(this);
         UpdateUiListener.getInstance().setListener(this);
 
@@ -164,8 +166,10 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
             @Override
             public void run() {
                 Log.d(TAG, "RUNNING");
-                CurrentTimeService.getInstance().updateTime(mBluetoothService);
-                handler.postDelayed(runnable, DELAY);
+                if(mBluetoothService != null) {
+                    CurrentTimeService.getInstance().updateTime(mBluetoothService);
+                    handler.postDelayed(runnable, DELAY);
+                }
             }
         }, DELAY);
     }
@@ -173,6 +177,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     private void applyButtonClickListers() {
         mButtonForgetDevice.setOnClickListener(v -> {
             showToast("Disconnecting from watch");
+            mAutoConnect = false;
             teardown();
             mDatabaseConnection.removeMacFromDatabase();
         });
@@ -323,7 +328,10 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
             initWatch();
         } else {
             enableDisableUI(false);
-            mBluetoothService = null;
+
+            if (mAutoConnect) {
+                makeBluetoothConnection();
+            }
         }
     }
 

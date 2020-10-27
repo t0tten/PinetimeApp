@@ -26,6 +26,7 @@ public class BluetoothService {
 
     private Disposable mScanSubscription;
     private Disposable mConnectionDisposable;
+    private Disposable connectionStateDisposable;
     private RxBleConnection mConnection;
     private boolean mIsConnected;
 
@@ -68,24 +69,22 @@ public class BluetoothService {
     public void connect(String macAddresss) {
         stopScanning();
         RxBleDevice connectedDevice = mRxBleClient.getBleDevice(macAddresss);
-        Disposable disposable = connectedDevice.observeConnectionStateChanges()
-            .subscribe(
-                connectionState -> {
-                    if(connectionState != RxBleConnection.RxBleConnectionState.CONNECTED) {
-                        this.connect(macAddresss);
-                    }
-                }, Throwable::printStackTrace);
+        connectionStateDisposable = connectedDevice.observeConnectionStateChanges()
+                .subscribe(
+                        connectionState -> {
+                        }, Throwable::printStackTrace);
 
         mConnectionDisposable = connectedDevice.establishConnection(true)
-            .subscribe(
-                rxBleConnection -> {
-                    mConnection = rxBleConnection;
-                    mIsConnected = true;
-                    if(WatchActivity.MAC_Address.isEmpty()) {
-                        mDatabaseConnection.saveMACToDatabase(macAddresss);
-                    }
-                    UpdateUiListener.getInstance().getListener().onConnectionChanged(mIsConnected, this);
-                }, Throwable::printStackTrace);
+                .subscribe(
+                        rxBleConnection -> {
+                            mConnection = rxBleConnection;
+                            mIsConnected = true;
+                            if (WatchActivity.MAC_Address.isEmpty()) {
+                                mDatabaseConnection.saveMACToDatabase(macAddresss);
+                            }
+                            UpdateUiListener.getInstance().getListener().onConnectionChanged(mIsConnected, this);
+                        }, Throwable::printStackTrace);
+
     }
 
     public void listenOnCharacteristic(UUID characteristicUUID) {
@@ -101,7 +100,9 @@ public class BluetoothService {
         if(mConnectionDisposable != null) {
             mConnectionDisposable.dispose();
             mConnectionDisposable = null;
-            Log.d(TAG, "Teardown connection.");
+        }
+        if(connectionStateDisposable != null) {
+            connectionStateDisposable.dispose();
         }
     }
 
