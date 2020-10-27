@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/button_disconnect"
+        android:id="@+id/button_forget_device"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
@@ -38,7 +38,7 @@
         android:layout_marginTop="50dp"
         android:text="@string/manufacturer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_disconnect" />
+        app:layout_constraintTop_toBottomOf="@+id/button_forget_device" />
 
     <TextView
         android:id="@+id/txt_serial"

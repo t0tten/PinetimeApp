@@ -51,7 +51,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     EditText mViewEditMusicArtist;
     EditText mViewEditMusicAlbum;
 
-    Button mButtonDisconnect;
+    Button mButtonForgetDevice;
     Button mButtonSendAlert;
     Button mButtonSendMusicInfo;
     Switch mButtonSendPlayingState;
@@ -168,14 +168,12 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
                 handler.postDelayed(runnable, DELAY);
             }
         }, DELAY);
-
-
     }
 
     private void applyButtonClickListers() {
-        mButtonDisconnect.setOnClickListener(v -> {
-            mBluetoothService.teardown();
+        mButtonForgetDevice.setOnClickListener(v -> {
             showToast("Disconnecting from watch");
+            teardown();
             mDatabaseConnection.removeMacFromDatabase();
         });
 
@@ -234,7 +232,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         mViewEditMusicArtist = findViewById(R.id.input_artist);
         mViewEditMusicAlbum = findViewById(R.id.input_album);
 
-        mButtonDisconnect = findViewById(R.id.button_disconnect);
+        mButtonForgetDevice = findViewById(R.id.button_forget_device);
         mButtonSendAlert = findViewById(R.id.button_alert);
         mButtonSendMusicInfo = findViewById(R.id.button_music);
         mButtonSendPlayingState = findViewById(R.id.button_playing);
@@ -276,7 +274,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         mViewEditMusicArtist.setEnabled(isEnabled);
         mViewEditMusicAlbum.setEnabled(isEnabled);
 
-        mButtonDisconnect.setEnabled(isEnabled);
+        mButtonForgetDevice.setEnabled(isEnabled);
         mButtonSendAlert.setEnabled(isEnabled);
         mButtonSendMusicInfo.setEnabled(isEnabled);
     }
@@ -325,6 +323,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
             initWatch();
         } else {
             enableDisableUI(false);
+            mBluetoothService = null;
         }
     }
 
