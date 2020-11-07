@@ -13,18 +13,18 @@ import java.util.stream.Stream;
 public class AlertNotificationService extends BaseService {
     private static final String NEW_ALERT = "NEW_ALERT";
 
-    private static final byte PADDING = 0x00;
-    private static final byte ALERT_UNKNOWN = 0x01;
-    private static final byte ALERT_SIMPLE_ALERT = 0x02;
-    private static final byte ALERT_EMAIL = 0x03;
-    private static final byte ALERT_NEWS = 0x04;
-    private static final byte ALERT_INCOMING_CALL = 0x05;
-    private static final byte ALERT_MISSED_CALL = 0x06;
-    private static final byte ALERT_SMS = 0x07;
-    private static final byte ALERT_VOICE_MAIL = 0x08;
-    private static final byte ALERT_SCHEDULE = 0x09;
-    private static final byte ALERT_HIGH_PRIORITY_ALERT = 0x0a;
-    private static final byte ALERT_INSTANT_MESSAGE = 0x0b;
+    public static final byte PADDING = 0x00;
+    public static final byte ALERT_UNKNOWN = 0x01;
+    public static final byte ALERT_SIMPLE_ALERT = 0x02;
+    public static final byte ALERT_EMAIL = 0x03;
+    public static final byte ALERT_NEWS = 0x04;
+    public static final byte ALERT_INCOMING_CALL = 0x05;
+    public static final byte ALERT_MISSED_CALL = 0x06;
+    public static final byte ALERT_SMS = 0x07;
+    public static final byte ALERT_VOICE_MAIL = 0x08;
+    public static final byte ALERT_SCHEDULE = 0x09;
+    public static final byte ALERT_HIGH_PRIORITY_ALERT = 0x0a;
+    public static final byte ALERT_INSTANT_MESSAGE = 0x0b;
 
     private static AlertNotificationService sInstance;
 
@@ -49,9 +49,13 @@ public class AlertNotificationService extends BaseService {
     }
 
     public void sendMessage(BluetoothService bluetoothService, String message) {
-        message = message.replaceAll("[^a-zA-Z: ]","");
+        sendMessage(bluetoothService, message, ALERT_SIMPLE_ALERT);
+    }
+
+    public void sendMessage(BluetoothService bluetoothService, String message, byte category) {
+        //message = message.replaceAll("[^a-zA-Z0-9:. ]","");
         ByteBuffer bb = ByteBuffer.allocate(message.length() + 4);
-        bb.put(ALERT_MISSED_CALL);
+        bb.put(category);
         bb.put(PADDING);
         bb.put(PADDING);
         bb.put(message.getBytes());

@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.infinitimeapp.bluetooth.BluetoothService;
+import com.example.infinitimeapp.listeners.IncomingCallReceiver;
 import com.example.infinitimeapp.listeners.NotificationService;
 import com.example.infinitimeapp.listeners.SpotifyBroadcastReceiver;
 import com.example.infinitimeapp.utils.DatabaseConnection;
@@ -38,7 +39,8 @@ import static com.example.infinitimeapp.common.Constants.TAG;
 
 public class WatchActivity extends AppCompatActivity implements NotificationService.NotificationListener,
                                                                 SpotifyBroadcastReceiver.ReceiverListener,
-                                                                UpdateUiListener.StatusChangedListener {
+                                                                UpdateUiListener.StatusChangedListener,
+                                                                IncomingCallReceiver.CallReceiverListener {
     TextView mViewTextManufacturer;
     TextView mViewTextModel;
     TextView mViewTextSerial;
@@ -93,6 +95,8 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
         new NotificationService().setListener(this);
         new SpotifyBroadcastReceiver().setListener(this);
+        new IncomingCallReceiver().setListener(this);
+
         mSpotifyConnection = new SpotifyConnection();
 
         getViewObjects();
@@ -342,4 +346,9 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
     @Override
     public void onSpotifyConnectionChange(boolean isConnected) {}
+
+    @Override
+    public void onCallReceived(String incomingNumber) {
+        AlertNotificationService.getInstance().sendMessage(mBluetoothService, incomingNumber, AlertNotificationService.ALERT_INCOMING_CALL);
+    }
 }

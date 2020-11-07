@@ -4,6 +4,9 @@
     package="com.example.infinitimeapp">
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
     <application
         android:allowBackup="true"
@@ -44,6 +47,11 @@
                 <action android:name="com.spotify.music.playbackstatechanged"/>
                 <action android:name="com.spotify.music.metadatachanged"/>
                 <action android:name="com.spotify.music.queuechanged"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".listeners.IncomingCallReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
     </application>
