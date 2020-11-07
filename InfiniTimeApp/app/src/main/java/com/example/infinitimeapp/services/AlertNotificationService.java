@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 public class AlertNotificationService extends BaseService {
     private static final String NEW_ALERT = "NEW_ALERT";
 
+    private static final byte PADDING = 0x00;
     private static final byte ALERT_UNKNOWN = 0x01;
     private static final byte ALERT_SIMPLE_ALERT = 0x02;
     private static final byte ALERT_EMAIL = 0x03;
@@ -49,8 +50,10 @@ public class AlertNotificationService extends BaseService {
 
     public void sendMessage(BluetoothService bluetoothService, String message) {
         message = message.replaceAll("[^a-zA-Z: ]","");
-        ByteBuffer bb = ByteBuffer.allocate(message.length() + 2);
+        ByteBuffer bb = ByteBuffer.allocate(message.length() + 4);
         bb.put(ALERT_MISSED_CALL);
+        bb.put(PADDING);
+        bb.put(PADDING);
         bb.put(message.getBytes());
 
         Log.d(Constants.TAG, message);
