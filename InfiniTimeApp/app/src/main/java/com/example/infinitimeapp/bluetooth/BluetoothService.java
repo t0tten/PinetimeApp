@@ -3,6 +3,7 @@ package com.example.infinitimeapp.bluetooth;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.infinitimeapp.services.AlertNotificationService;
 import com.example.infinitimeapp.services.MusicService;
 import com.example.infinitimeapp.utils.DatabaseConnection;
 import com.example.infinitimeapp.WatchActivity;
@@ -92,7 +93,12 @@ public class BluetoothService {
             .flatMap(notificationObservable -> notificationObservable)
             .subscribe(
                 bytes -> {
-                    MusicService.getInstance().onDataRecieved(characteristicUUID, bytes);
+                    Log.d(TAG, "Event received - Bytes: " + bytes);
+                    if(MusicService.getInstance().getEventUUID().equals(characteristicUUID)) {
+                        MusicService.getInstance().onDataRecieved(characteristicUUID, bytes);
+                    } else if (AlertNotificationService.getInstance().getEventUUID().equals(characteristicUUID)) {
+                        AlertNotificationService.getInstance().onDataRecieved(characteristicUUID, bytes);
+                    }
                 }, Throwable::printStackTrace);
     }
 

@@ -33,6 +33,10 @@ public class MusicService extends BaseService {
         return sInstance;
     }
 
+    public UUID getEventUUID() {
+        return getCharacteristicUUID(EVENT);
+    }
+
     @Override
     public void onDataRecieved(UUID characteristicName, byte[] message) {
         switch(getCharacteristicName(characteristicName)) {

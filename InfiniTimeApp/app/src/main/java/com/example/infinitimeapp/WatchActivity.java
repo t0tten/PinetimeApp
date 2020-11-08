@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -71,6 +72,8 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     static final int REQUEST_ENABLE_BT = 1;
     public static String MAC_Address = "";
 
+    public static TelecomManager sTelecomManager;
+
     private boolean mAutoConnect;
 
     @Override
@@ -92,6 +95,12 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         checkNotificationPermissions();
+
+        final TelecomManager telecomManager = (TelecomManager) this.getSystemService(Context.TELECOM_SERVICE);
+        if (telecomManager != null && ContextCompat.checkSelfPermission(this, Manifest.permission.ANSWER_PHONE_CALLS) == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "WatchACtivity telecom!");
+            sTelecomManager = telecomManager;
+        }
 
         new NotificationService().setListener(this);
         new SpotifyBroadcastReceiver().setListener(this);
@@ -165,6 +174,8 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
 
         CurrentTimeService.getInstance().updateTime(mBluetoothService);
         MusicService.getInstance().subscribeOnEvents(mBluetoothService);
+
+        AlertNotificationService.getInstance().subscribeOnEvents(mBluetoothService);
 
         handler.postDelayed(runnable = new Runnable() {
             @Override
@@ -350,5 +361,10 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     @Override
     public void onCallReceived(String incomingNumber) {
         AlertNotificationService.getInstance().sendMessage(mBluetoothService, incomingNumber, AlertNotificationService.ALERT_INCOMING_CALL);
+    }
+
+    @Override
+    public void onCallOffHook(String incomingNumber) {
+        AlertNotificationService.getInstance().sendMessage(mBluetoothService, incomingNumber, AlertNotificationService.ALERT_MISSED_CALL);
     }
 }
