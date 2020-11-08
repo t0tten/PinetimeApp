@@ -37,6 +37,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import static android.Manifest.permission.ANSWER_PHONE_CALLS;
+import static android.Manifest.permission.READ_CALL_LOG;
+import static android.Manifest.permission.READ_CONTACTS;
+import static android.Manifest.permission.READ_PHONE_NUMBERS;
+import static android.Manifest.permission.READ_PHONE_STATE;
 import static com.example.infinitimeapp.common.Constants.DELAY;
 import static com.example.infinitimeapp.common.Constants.TAG;
 
@@ -98,12 +102,12 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         }
         checkNotificationPermissions();
 
+        ActivityCompat.requestPermissions(this, new String[]{ANSWER_PHONE_CALLS, READ_CALL_LOG, READ_PHONE_NUMBERS, READ_CONTACTS, READ_PHONE_STATE}, 0);
+        
         final TelecomManager telecomManager = (TelecomManager) this.getSystemService(Context.TELECOM_SERVICE);
         if (telecomManager != null && ContextCompat.checkSelfPermission(this, ANSWER_PHONE_CALLS) == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "WatchACtivity telecom!");
             sTelecomManager = telecomManager;
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{ANSWER_PHONE_CALLS}, 0);
         }
 
         new NotificationService().setListener(this);
