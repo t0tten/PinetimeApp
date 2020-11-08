@@ -33,8 +33,10 @@ import com.example.infinitimeapp.utils.SpotifyConnection;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import static android.Manifest.permission.ANSWER_PHONE_CALLS;
 import static com.example.infinitimeapp.common.Constants.DELAY;
 import static com.example.infinitimeapp.common.Constants.TAG;
 
@@ -97,9 +99,11 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         checkNotificationPermissions();
 
         final TelecomManager telecomManager = (TelecomManager) this.getSystemService(Context.TELECOM_SERVICE);
-        if (telecomManager != null && ContextCompat.checkSelfPermission(this, Manifest.permission.ANSWER_PHONE_CALLS) == PackageManager.PERMISSION_GRANTED) {
+        if (telecomManager != null && ContextCompat.checkSelfPermission(this, ANSWER_PHONE_CALLS) == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "WatchACtivity telecom!");
             sTelecomManager = telecomManager;
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{ANSWER_PHONE_CALLS}, 0);
         }
 
         new NotificationService().setListener(this);
@@ -366,5 +370,17 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
     @Override
     public void onCallOffHook(String incomingNumber) {
         AlertNotificationService.getInstance().sendMessage(mBluetoothService, incomingNumber, AlertNotificationService.ALERT_MISSED_CALL);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (grantResults.length > 0) {
+            boolean AnswerPermission = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (AnswerPermission) {
+                Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
