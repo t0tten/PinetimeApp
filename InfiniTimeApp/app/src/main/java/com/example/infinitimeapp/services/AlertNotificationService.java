@@ -67,11 +67,9 @@ public class AlertNotificationService extends BaseService {
 
         switch (message[0]) {
             case EVENT_ANSWER_CALL:
-                Log.d(TAG, "ANSWER CALL!");
                 answerPhoneCall();
                 break;
             case EVENT_HANG_UP_CALL:
-                Log.d(TAG, "HANG UP CALL!");
                 hangUpPhoneCall();
                 break;
         }
@@ -89,13 +87,12 @@ public class AlertNotificationService extends BaseService {
     private void hangUpPhoneCall() {
         TelecomManager telecomManager = WatchActivity.sTelecomManager;
         if(telecomManager != null) {
-            Log.d(TAG, "HANG UP CALL! INNE");
             telecomManager.endCall();
         }
     }
 
     public void sendMessage(BluetoothService bluetoothService, String message) {
-        sendMessage(bluetoothService, message, ALERT_INCOMING_CALL);
+        sendMessage(bluetoothService, message, ALERT_SIMPLE_ALERT);
     }
 
     public void subscribeOnEvents(BluetoothService bluetoothService) {

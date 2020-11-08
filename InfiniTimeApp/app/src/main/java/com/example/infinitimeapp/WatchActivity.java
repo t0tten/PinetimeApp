@@ -101,14 +101,7 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         checkNotificationPermissions();
-
         ActivityCompat.requestPermissions(this, new String[]{ANSWER_PHONE_CALLS, READ_CALL_LOG, READ_PHONE_NUMBERS, READ_CONTACTS, READ_PHONE_STATE}, 0);
-        
-        final TelecomManager telecomManager = (TelecomManager) this.getSystemService(Context.TELECOM_SERVICE);
-        if (telecomManager != null && ContextCompat.checkSelfPermission(this, ANSWER_PHONE_CALLS) == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "WatchACtivity telecom!");
-            sTelecomManager = telecomManager;
-        }
 
         new NotificationService().setListener(this);
         new SpotifyBroadcastReceiver().setListener(this);
@@ -381,9 +374,9 @@ public class WatchActivity extends AppCompatActivity implements NotificationServ
         if (grantResults.length > 0) {
             boolean AnswerPermission = grantResults[0] == PackageManager.PERMISSION_GRANTED;
             if (AnswerPermission) {
-                Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_LONG).show();
+                if(grantResults[0] == 0) {
+                    sTelecomManager = (TelecomManager) this.getSystemService(Context.TELECOM_SERVICE);
+                }
             }
         }
     }
