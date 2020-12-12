@@ -13,3 +13,6 @@ Pinetime Infinitime Android application that can send and receive information fr
 * Receive TrackInformation from Spotify
 * Remote control Spotify(Next song, Previous song, Play, Pause, Volume Up, Volume Down)
 * Send device notifications to watch
+
+## TODO
+* Run spotify in background

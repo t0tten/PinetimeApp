@@ -11,7 +11,7 @@ import com.spotify.android.appremote.api.SpotifyAppRemote;
 import static com.example.infinitimeapp.common.Constants.*;
 
 public class SpotifyConnection {
-    private static final String CLIENT_ID = "<CLIENT_ID>";
+    private static final String CLIENT_ID = "";
     private static final String REDIRECT_URI = "http://com.example.infinitimeapp/callback";
     private final ConnectionParams connectionParams;
 

@@ -17,6 +17,7 @@ public class SpotifyBroadcastReceiver extends android.content.BroadcastReceiver 
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d(Constants.TAG, "spotify OnReceive");
         final String SPOTIFY_PACKAGE = "com.spotify.music";
         final String PLAYBACK_STATE_CHANGED = SPOTIFY_PACKAGE + ".playbackstatechanged";
         final String METADATA_CHANGED = SPOTIFY_PACKAGE + ".metadatachanged";
@@ -26,6 +27,7 @@ public class SpotifyBroadcastReceiver extends android.content.BroadcastReceiver 
             final String ARTIST = "artist";
             final String TRACK = "track";
             final String ALBUM = "album";
+            Log.d(Constants.TAG, intent.getStringExtra(ARTIST));
 
             TrackInformation trackInformation = new TrackInformation.Builder()
                     .withArtist(intent.getStringExtra(ARTIST))
