@@ -36,7 +36,7 @@ public class AlertNotificationService extends BaseService {
     private AlertNotificationService() {
         super(Stream.of(new String[][]{
                 {NEW_ALERT, "00002a46-0000-1000-8000-00805f9b34fb"},
-                {EVENT, "00002a47-0000-1000-8000-00805f9b34fb"}
+                {EVENT,     "c7e50000-78fc-48fe-8e23-433b3a1942d1"}
         }).collect(Collectors.toMap(p -> p[0], p -> p[1])));
     }
 
